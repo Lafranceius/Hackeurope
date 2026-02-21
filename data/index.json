@@ -1,0 +1,136 @@
+{
+  "generated_at": "<timestamp>",
+  "case_count": 13,
+  "cases": [
+    {
+      "case_id": "case_A1_sales_light_dirty",
+      "title": "Sales transactions (light formatting dirt)",
+      "category": "A",
+      "degree_of_dirtyness": 1,
+      "domain": "sales",
+      "input_workbook": "A/case_A1_sales_light_dirty_input.xlsx",
+      "expected_workbook": "A/case_A1_sales_light_dirty_expected_clean.xlsx",
+      "manifest": "A/case_A1_sales_light_dirty_manifest.json"
+    },
+    {
+      "case_id": "case_A2_inventory_numbers_as_text",
+      "title": "Inventory list (numbers-as-text + duplicates)",
+      "category": "A",
+      "degree_of_dirtyness": 2,
+      "domain": "inventory",
+      "input_workbook": "A/case_A2_inventory_numbers_as_text_input.xlsx",
+      "expected_workbook": "A/case_A2_inventory_numbers_as_text_expected_clean.xlsx",
+      "manifest": "A/case_A2_inventory_numbers_as_text_manifest.json"
+    },
+    {
+      "case_id": "case_A3_supplier_master_clean_baseline",
+      "title": "Supplier master (already clean baseline)",
+      "category": "A",
+      "degree_of_dirtyness": 0,
+      "domain": "master_data",
+      "input_workbook": "A/case_A3_supplier_master_clean_baseline_input.xlsx",
+      "expected_workbook": "A/case_A3_supplier_master_clean_baseline_expected_clean.xlsx",
+      "manifest": "A/case_A3_supplier_master_clean_baseline_manifest.json"
+    },
+    {
+      "case_id": "case_B1_transactions_ambiguous_dates",
+      "title": "Transactions with ambiguous date locale",
+      "category": "B",
+      "degree_of_dirtyness": 2,
+      "domain": "transactions",
+      "input_workbook": "B/case_B1_transactions_ambiguous_dates_input.xlsx",
+      "expected_workbook": "B/case_B1_transactions_ambiguous_dates_expected_clean_ddmmyyyy.xlsx",
+      "manifest": "B/case_B1_transactions_ambiguous_dates_manifest.json"
+    },
+    {
+      "case_id": "case_B2_orders_coded_status",
+      "title": "Orders with coded status and no legend",
+      "category": "B",
+      "degree_of_dirtyness": 2,
+      "domain": "orders",
+      "input_workbook": "B/case_B2_orders_coded_status_input.xlsx",
+      "expected_workbook": "B/case_B2_orders_coded_status_expected_clean_statusmap_v1.xlsx",
+      "manifest": "B/case_B2_orders_coded_status_manifest.json"
+    },
+    {
+      "case_id": "case_B3_shipments_mixed_units",
+      "title": "Shipments with mixed weight units (no conversion policy)",
+      "category": "B",
+      "degree_of_dirtyness": 3,
+      "domain": "logistics",
+      "input_workbook": "B/case_B3_shipments_mixed_units_input.xlsx",
+      "expected_workbook": "B/case_B3_shipments_mixed_units_expected_clean_unitpolicy_kg.xlsx",
+      "manifest": "B/case_B3_shipments_mixed_units_manifest.json"
+    },
+    {
+      "case_id": "case_C1_sales_report_merged_subtotals",
+      "title": "Sales report with merged region cells + subtotals",
+      "category": "C",
+      "degree_of_dirtyness": 3,
+      "domain": "sales_reporting",
+      "input_workbook": "C/case_C1_sales_report_merged_subtotals_input.xlsx",
+      "expected_workbook": "C/case_C1_sales_report_merged_subtotals_expected_clean.xlsx",
+      "manifest": "C/case_C1_sales_report_merged_subtotals_manifest.json"
+    },
+    {
+      "case_id": "case_C2_multitable_crosstab",
+      "title": "Multi-table sheet with crosstab + footnotes",
+      "category": "C",
+      "degree_of_dirtyness": 4,
+      "domain": "sales_and_marketing",
+      "input_workbook": "C/case_C2_multitable_crosstab_input.xlsx",
+      "expected_workbook": "C/case_C2_multitable_crosstab_expected_clean.xlsx",
+      "manifest": "C/case_C2_multitable_crosstab_manifest.json"
+    },
+    {
+      "case_id": "case_C3_multirow_header_inconsistent_labels",
+      "title": "Multi-row header + inconsistent product labels + totals",
+      "category": "C",
+      "degree_of_dirtyness": 4,
+      "domain": "finance_reporting",
+      "input_workbook": "C/case_C3_multirow_header_inconsistent_labels_input.xlsx",
+      "expected_workbook": "C/case_C3_multirow_header_inconsistent_labels_expected_clean.xlsx",
+      "manifest": "C/case_C3_multirow_header_inconsistent_labels_manifest.json"
+    },
+    {
+      "case_id": "case_C4_scattered_tables_ops_snapshot",
+      "title": "Ops snapshot with scattered small tables (edge C/D)",
+      "category": "C",
+      "degree_of_dirtyness": 4,
+      "domain": "operations",
+      "input_workbook": "C/case_C4_scattered_tables_ops_snapshot_input.xlsx",
+      "expected_workbook": "C/case_C4_scattered_tables_ops_snapshot_expected_clean.xlsx",
+      "manifest": "C/case_C4_scattered_tables_ops_snapshot_manifest.json"
+    },
+    {
+      "case_id": "case_D1_report_like_workbook",
+      "title": "Report-style workbook with narrative text and scattered KPIs",
+      "category": "D",
+      "degree_of_dirtyness": 5,
+      "domain": "executive_reporting",
+      "input_workbook": "D/case_D1_report_like_workbook_input.xlsx",
+      "expected_workbook": "D/case_D1_report_like_workbook_expected_human_structured.xlsx",
+      "manifest": "D/case_D1_report_like_workbook_manifest.json"
+    },
+    {
+      "case_id": "case_D2_broken_export_misaligned_columns",
+      "title": "Broken export with mid-sheet column shifts (misaligned)",
+      "category": "D",
+      "degree_of_dirtyness": 5,
+      "domain": "transactions",
+      "input_workbook": "D/case_D2_broken_export_misaligned_columns_input.xlsx",
+      "expected_workbook": "D/case_D2_broken_export_misaligned_columns_expected_human_structured.xlsx",
+      "manifest": "D/case_D2_broken_export_misaligned_columns_manifest.json"
+    },
+    {
+      "case_id": "case_D3_board_pack_mixed_content",
+      "title": "Board pack with mixed unrelated content and placeholders (edge D)",
+      "category": "D",
+      "degree_of_dirtyness": 5,
+      "domain": "board_reporting",
+      "input_workbook": "D/case_D3_board_pack_mixed_content_input.xlsx",
+      "expected_workbook": "D/case_D3_board_pack_mixed_content_expected_human_structured.xlsx",
+      "manifest": "D/case_D3_board_pack_mixed_content_manifest.json"
+    }
+  ]
+}
