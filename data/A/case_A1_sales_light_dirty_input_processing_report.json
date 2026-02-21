@@ -1,0 +1,53 @@
+{
+  "source_file": "data/A/case_A1_sales_light_dirty_input.xlsx",
+  "output_file": "data/A/case_A1_sales_light_dirty_input_processed.xlsx",
+  "status": "success",
+  "processing_plan": {
+    "source_file": "data/A/case_A1_sales_light_dirty_input.xlsx",
+    "screening_report_ref": "e68fbd9e04642ce8aaf8e8bb67a9a74d7974dd0e8db06cad77900de0d15448f6",
+    "selected_route": "normalizer",
+    "assumptions": [
+      "Headers are in the first row"
+    ],
+    "user_inputs_used": {},
+    "target_output_sheets": [
+      "Sales Data_clean"
+    ],
+    "planned_transforms": [
+      "extract_tables",
+      "normalize_headers",
+      "normalize_values"
+    ],
+    "planned_validations": [
+      "row_count_check",
+      "type_check"
+    ],
+    "review_policy": "standard",
+    "stop_conditions": [
+      "critical_parse_error"
+    ],
+    "rollback_strategy": "abort_and_keep_original"
+  },
+  "executed_transforms": [
+    {
+      "transform_name": "normalize_headers",
+      "status": "success",
+      "details": "Renamed columns from ['ACME NORTHWIND SALES EXPORT', 'Unnamed: 1', 'Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4', 'Unnamed: 5', 'Unnamed: 6', 'Unnamed: 7'] to ['acme_northwind_sales_export', 'unnamed:_1', 'unnamed:_2', 'unnamed:_3', 'unnamed:_4', 'unnamed:_5', 'unnamed:_6', 'unnamed:_7']"
+    },
+    {
+      "transform_name": "normalize_values",
+      "status": "success",
+      "details": "Stripped whitespace from string columns"
+    }
+  ],
+  "technical_verification": {
+    "status": "passed"
+  },
+  "semantic_verification": {
+    "status": "passed"
+  },
+  "review_flags": [],
+  "errors": [],
+  "warnings": [],
+  "summary_for_user": "Processing completed successfully."
+}

@@ -1,0 +1,79 @@
+{
+  "case_id": "case_B2_orders_coded_status",
+  "title": "Orders with coded status and no legend",
+  "category": "B",
+  "degree_of_dirtyness": 2,
+  "domain": "orders",
+  "source_workbook_filename": "case_B2_orders_coded_status_input.xlsx",
+  "expected_workbook_filename": "case_B2_orders_coded_status_expected_clean_statusmap_v1.xlsx",
+  "screening_expected": {
+    "category": "B",
+    "confidence_range": "85-95",
+    "hard_gate_triggers": [
+      "coded_status_without_legend"
+    ],
+    "key_reasons": [
+      "Status column contains codes (C/P/X) with no legend; meaning required from uploader."
+    ],
+    "uploader_questions": [
+      "What do the status codes mean (e.g., C/P/X)? Please provide mapping to full status labels."
+    ],
+    "review_requirements": [],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "needs_input",
+    "status_with_inputs": "success",
+    "status_default": "success",
+    "assumptions_used": "Assumed uploader answer: status mapping {'C': 'Closed', 'P': 'Pending', 'X': 'Cancelled'}.",
+    "expected_output_sheets": [
+      "orders_clean",
+      "mapping_tables",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Detect coded status and block for uploader input",
+      "Apply uploader-provided status_code mapping (mapping_tables)",
+      "Parse order_total from currency text -> numeric",
+      "Normalize customer_name casing/whitespace"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "orders_clean row count equals 32",
+          "expected": 32
+        }
+      ],
+      "sum_checks": [
+        {
+          "check": "sum(order_total_usd) equals expected",
+          "sheet": "orders_clean",
+          "column": "order_total_usd",
+          "expected_sum": 87089.94
+        }
+      ],
+      "mapping_checks": [
+        {
+          "check": "status has no 'Unknown'",
+          "expected": true
+        },
+        {
+          "check": "mapping_tables contains 3 codes",
+          "expected": 3
+        }
+      ],
+      "review_queue_expected": false
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "coded_status",
+      "sheet_name": "Orders",
+      "description": "Status values are coded (C/P/X) with no legend",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    }
+  ]
+}

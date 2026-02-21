@@ -1,0 +1,118 @@
+{
+  "case_id": "case_A1_sales_light_dirty",
+  "title": "Sales transactions (light formatting dirt)",
+  "category": "A",
+  "degree_of_dirtyness": 1,
+  "domain": "sales",
+  "source_workbook_filename": "case_A1_sales_light_dirty_input.xlsx",
+  "expected_workbook_filename": "case_A1_sales_light_dirty_expected_clean.xlsx",
+  "screening_expected": {
+    "category": "A",
+    "confidence_range": "90-98",
+    "hard_gate_triggers": [],
+    "key_reasons": [
+      "Issues are deterministic to fix (trim/case normalize, numbers-as-text, non-ambiguous dates, missing tokens, exact duplicate)."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "success",
+    "status_with_inputs": "success",
+    "status_default": "success",
+    "assumptions_used": "None (deterministic cleaning).",
+    "expected_output_sheets": [
+      "sales_clean",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Detect main table; ignore title and spacer rows",
+      "Trim whitespace in text fields",
+      "Normalize casing for customer_name and region",
+      "Parse amount from currency text -> numeric",
+      "Parse non-ambiguous dates -> ISO",
+      "Normalize missing tokens (N/A, '-') -> null",
+      "Drop exact duplicate rows",
+      "Rename headers to snake_case"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "sales_clean row count equals 30",
+          "expected": 30
+        },
+        {
+          "check": "exact duplicates removed",
+          "expected_removed": 1
+        }
+      ],
+      "sum_checks": [
+        {
+          "check": "sum(amount_usd) equals expected",
+          "sheet": "sales_clean",
+          "column": "amount_usd",
+          "expected_sum": 42460.83
+        }
+      ],
+      "mapping_checks": [
+        {
+          "check": "all column names are snake_case",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": false
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "whitespace",
+      "sheet_name": "Sales Data",
+      "description": "Leading/trailing whitespace in Customer Name and Product",
+      "severity": "low",
+      "affects_screening": false,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "mixed_case",
+      "sheet_name": "Sales Data",
+      "description": "Customer and Region casing inconsistent",
+      "severity": "low",
+      "affects_screening": false,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "numbers_as_text",
+      "sheet_name": "Sales Data",
+      "description": "Amount column contains '$' and commas as text",
+      "severity": "moderate",
+      "affects_screening": false,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "date_format_variation",
+      "sheet_name": "Sales Data",
+      "description": "Multiple non-ambiguous date formats",
+      "severity": "low",
+      "affects_screening": false,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "missing_value_tokens",
+      "sheet_name": "Sales Data",
+      "description": "Notes uses N/A, '-' and blanks",
+      "severity": "low",
+      "affects_screening": false,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "exact_duplicates",
+      "sheet_name": "Sales Data",
+      "description": "One exact duplicate row present",
+      "severity": "low",
+      "affects_screening": false,
+      "affects_processing": true
+    }
+  ]
+}

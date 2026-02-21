@@ -1,0 +1,88 @@
+{
+  "case_id": "case_D3_board_pack_mixed_content",
+  "title": "Board pack with mixed unrelated content and placeholders (edge D)",
+  "category": "D",
+  "degree_of_dirtyness": 5,
+  "domain": "board_reporting",
+  "source_workbook_filename": "case_D3_board_pack_mixed_content_input.xlsx",
+  "expected_workbook_filename": "case_D3_board_pack_mixed_content_expected_human_structured.xlsx",
+  "screening_expected": {
+    "category": "D",
+    "confidence_range": "80-95",
+    "hard_gate_triggers": [
+      "mixed_content",
+      "placeholders",
+      "undefined_flags"
+    ],
+    "key_reasons": [
+      "Mixed narrative + mini-tables + placeholders; undefined flags (SP); not stable dataset."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [],
+    "human_handoff_reasons": [
+      "Chart placeholders cannot be extracted as structured data",
+      "Narrative sections contain qualitative statements and TBD values",
+      "Undefined SP flag requires clarification"
+    ]
+  },
+  "processing_expected": {
+    "status_without_inputs": "human_recommended",
+    "status_with_inputs": "human_recommended",
+    "status_default": "human_recommended",
+    "assumptions_used": "Expected workbook is a human-structured target KPI table.",
+    "expected_output_sheets": [
+      "kpi_facts",
+      "review_required",
+      "metadata_notes",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Human extract key metrics from mini tables",
+      "Normalize units and period",
+      "Flag undefined abbreviations for follow-up"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "kpi_facts row count equals 5",
+          "expected": 5
+        }
+      ],
+      "sum_checks": [],
+      "mapping_checks": [
+        {
+          "check": "review_required contains SP undefined flag item",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": true
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "mixed_unrelated_content",
+      "sheet_name": "Board Pack",
+      "description": "Sales highlights, headcount, risks combined",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "chart_placeholder",
+      "sheet_name": "Board Pack",
+      "description": "Bookings vs Target placeholder",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "undefined_abbreviation",
+      "sheet_name": "Board Pack",
+      "description": "SP flag without legend",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "case_id": "case_C1_sales_report_merged_subtotals",
+  "title": "Sales report with merged region cells + subtotals",
+  "category": "C",
+  "degree_of_dirtyness": 3,
+  "domain": "sales_reporting",
+  "source_workbook_filename": "case_C1_sales_report_merged_subtotals_input.xlsx",
+  "expected_workbook_filename": "case_C1_sales_report_merged_subtotals_expected_clean.xlsx",
+  "screening_expected": {
+    "category": "C",
+    "confidence_range": "75-90",
+    "hard_gate_triggers": [],
+    "key_reasons": [
+      "Merged cells and subtotal/grand total rows require heuristics; output should be reviewed."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [
+      "Confirm 4 'Subtotal' rows and 1 'Grand Total' row are excluded",
+      "Spot-check region fill-down boundaries from merged cells",
+      "Verify sum(amount_usd) reconciles to report grand total (excluding subtotals)"
+    ],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "needs_review",
+    "status_with_inputs": "needs_review",
+    "status_default": "needs_review",
+    "assumptions_used": "Heuristic extraction: header at row 5; remove subtotal rows by keyword; fill down region from merged cells; preserve notes.",
+    "expected_output_sheets": [
+      "sales_detail_clean",
+      "review_required",
+      "metadata_notes",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Skip title rows above header",
+      "Fill down merged region labels",
+      "Remove subtotal and grand total rows",
+      "Parse mixed date formats and currency text",
+      "Write normalized sales_detail_clean"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "sales_detail_clean row count equals 48",
+          "expected": 48
+        }
+      ],
+      "sum_checks": [
+        {
+          "check": "sum(amount_usd) equals expected (detail rows only)",
+          "sheet": "sales_detail_clean",
+          "column": "amount_usd",
+          "expected_sum": 49657.64
+        }
+      ],
+      "mapping_checks": [
+        {
+          "check": "review_required has at least 3 items",
+          "expected_min": 3
+        }
+      ],
+      "review_queue_expected": true
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "merged_cells",
+      "sheet_name": "Sales Report",
+      "description": "Region labels are merged across blocks",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "subtotal_rows",
+      "sheet_name": "Sales Report",
+      "description": "Subtotal rows after each region and grand total row",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "notes_block",
+      "sheet_name": "Sales Report",
+      "description": "Notes/footnotes at bottom of sheet",
+      "severity": "moderate",
+      "affects_screening": false,
+      "affects_processing": true
+    }
+  ]
+}

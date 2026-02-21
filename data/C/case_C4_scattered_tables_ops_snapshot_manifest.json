@@ -1,0 +1,85 @@
+{
+  "case_id": "case_C4_scattered_tables_ops_snapshot",
+  "title": "Ops snapshot with scattered small tables (edge C/D)",
+  "category": "C",
+  "degree_of_dirtyness": 4,
+  "domain": "operations",
+  "source_workbook_filename": "case_C4_scattered_tables_ops_snapshot_input.xlsx",
+  "expected_workbook_filename": "case_C4_scattered_tables_ops_snapshot_expected_clean.xlsx",
+  "screening_expected": {
+    "category": "C",
+    "confidence_range": "65-85",
+    "hard_gate_triggers": [],
+    "key_reasons": [
+      "Scattered small tables are recoverable but require heuristic table boundary detection; review required (edge C/D)."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [
+      "Confirm table boundaries and row counts for each output sheet",
+      "Confirm '(break)' separator row excluded"
+    ],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "needs_review",
+    "status_with_inputs": "needs_review",
+    "status_default": "needs_review",
+    "assumptions_used": "Detected three tables by title rows; removed non-data separator; coerced numeric minutes fields.",
+    "expected_output_sheets": [
+      "incidents_clean",
+      "downtime_clean",
+      "tickets_clean",
+      "review_required",
+      "metadata_notes",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Detect and split scattered tables into separate sheets",
+      "Remove non-data separator row",
+      "Coerce minutes/downtime to integer"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "incidents_clean row count equals 15",
+          "expected": 15
+        },
+        {
+          "check": "downtime_clean row count equals 12",
+          "expected": 12
+        },
+        {
+          "check": "tickets_clean row count equals 20",
+          "expected": 20
+        }
+      ],
+      "sum_checks": [],
+      "mapping_checks": [
+        {
+          "check": "review_required present",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": true
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "scattered_tables",
+      "sheet_name": "Ops Snapshot",
+      "description": "Multiple tables separated by blank rows and titles",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "non_data_rows",
+      "sheet_name": "Ops Snapshot",
+      "description": "'(break)' separator row in Tickets section",
+      "severity": "moderate",
+      "affects_screening": false,
+      "affects_processing": true
+    }
+  ]
+}

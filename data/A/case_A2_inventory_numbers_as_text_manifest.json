@@ -1,0 +1,97 @@
+{
+  "case_id": "case_A2_inventory_numbers_as_text",
+  "title": "Inventory list (numbers-as-text + duplicates)",
+  "category": "A",
+  "degree_of_dirtyness": 2,
+  "domain": "inventory",
+  "source_workbook_filename": "case_A2_inventory_numbers_as_text_input.xlsx",
+  "expected_workbook_filename": "case_A2_inventory_numbers_as_text_expected_clean.xlsx",
+  "screening_expected": {
+    "category": "A",
+    "confidence_range": "90-97",
+    "hard_gate_triggers": [],
+    "key_reasons": [
+      "Deterministic cleaning: numbers stored as text, blank columns, exact duplicate rows, header normalization."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "success",
+    "status_with_inputs": "success",
+    "status_default": "success",
+    "assumptions_used": "None (deterministic cleaning).",
+    "expected_output_sheets": [
+      "inventory_clean",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Trim whitespace around item_id and item_name",
+      "Normalize item_name casing",
+      "Parse quantity (strip apostrophes/spaces) -> integer",
+      "Parse unit_price (strip '$') -> numeric",
+      "Drop exact duplicate row(s)",
+      "Drop blank column",
+      "Rename headers to snake_case"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "inventory_clean row count equals 28",
+          "expected": 28
+        }
+      ],
+      "sum_checks": [
+        {
+          "check": "sum(quantity) equals expected",
+          "sheet": "inventory_clean",
+          "column": "quantity",
+          "expected_sum": 1890
+        }
+      ],
+      "mapping_checks": [
+        {
+          "check": "no empty header columns remain",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": false
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "numbers_as_text",
+      "sheet_name": "Inventory Export",
+      "description": "Qty and Unit Price stored as text (apostrophes, $)",
+      "severity": "moderate",
+      "affects_screening": false,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "blank_columns",
+      "sheet_name": "Inventory Export",
+      "description": "Unnamed blank column between Warehouse and Last Counted",
+      "severity": "low",
+      "affects_screening": false,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "duplicate_rows",
+      "sheet_name": "Inventory Export",
+      "description": "One exact duplicate row",
+      "severity": "low",
+      "affects_screening": false,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "header_inconsistency",
+      "sheet_name": "Inventory Export",
+      "description": "Headers inconsistent casing/spaces",
+      "severity": "low",
+      "affects_screening": false,
+      "affects_processing": true
+    }
+  ]
+}

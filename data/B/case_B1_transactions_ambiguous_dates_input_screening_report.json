@@ -1,0 +1,74 @@
+{
+  "file_path": "data/B/case_B1_transactions_ambiguous_dates_input.xlsx",
+  "file_hash": "9ce2e0cff3ff17b7c34aed2d6461107906cbc9867d16e97347ea306648bd5cc8",
+  "timestamp": "2026-02-21T23:39:29.163031",
+  "risk_mode": "medium",
+  "workbook_summary": {
+    "filename": "case_B1_transactions_ambiguous_dates_input.xlsx",
+    "file_path": "data/B/case_B1_transactions_ambiguous_dates_input.xlsx",
+    "file_size": 5244,
+    "extension": ".xlsx",
+    "file_hash": "9ce2e0cff3ff17b7c34aed2d6461107906cbc9867d16e97347ea306648bd5cc8",
+    "sheet_names": [
+      "Card Export"
+    ],
+    "hidden_sheets": [],
+    "total_merged_cells": 0,
+    "total_formulas": 0
+  },
+  "sheet_summaries": [
+    {
+      "sheet_name": "Card Export",
+      "used_range": "A1:X33",
+      "blank_rows": 1,
+      "blank_cols": 0,
+      "merged_cells_count": 0,
+      "comments_count": 0,
+      "formulas_count": 0,
+      "probable_title_rows": 1,
+      "document_like": false
+    }
+  ],
+  "detected_tables": [
+    {
+      "sheet_name": "Card Export",
+      "range_ref": "A1:Z100",
+      "tabularity_score": 0.9,
+      "header_row_index": 0,
+      "header_confidence": 0.95
+    }
+  ],
+  "issues": [
+    {
+      "issue_type": "ambiguity",
+      "severity": "high",
+      "description": "Ambiguous column: Corporate Card Transactions",
+      "sheet_name": "Card Export",
+      "column_name": "Corporate Card Transactions"
+    }
+  ],
+  "hard_gate_triggers": [
+    "Ambiguous columns detected"
+  ],
+  "category": "B",
+  "overall_confidence": 0.85,
+  "requires_uploader_input": [
+    {
+      "question_text": "Please clarify the date format used in the document.",
+      "impacted_sheet": null,
+      "impacted_column": null,
+      "why_it_matters": "Ambiguous dates can lead to incorrect data processing.",
+      "example_choices": [
+        "MM/DD/YYYY",
+        "DD/MM/YYYY"
+      ]
+    }
+  ],
+  "review_requirements": [],
+  "recommended_processing_route": "hybrid",
+  "safe_actions_possible": [
+    "extract_tables",
+    "normalize_headers"
+  ],
+  "screening_notes": "Automated screening completed."
+}

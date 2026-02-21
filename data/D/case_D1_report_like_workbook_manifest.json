@@ -1,0 +1,96 @@
+{
+  "case_id": "case_D1_report_like_workbook",
+  "title": "Report-style workbook with narrative text and scattered KPIs",
+  "category": "D",
+  "degree_of_dirtyness": 5,
+  "domain": "executive_reporting",
+  "source_workbook_filename": "case_D1_report_like_workbook_input.xlsx",
+  "expected_workbook_filename": "case_D1_report_like_workbook_expected_human_structured.xlsx",
+  "screening_expected": {
+    "category": "D",
+    "confidence_range": "85-97",
+    "hard_gate_triggers": [
+      "document_like_layout",
+      "narrative_text",
+      "chart_placeholders",
+      "undefined_abbreviations"
+    ],
+    "key_reasons": [
+      "Workbook is report-like with merged narrative blocks, placeholders, and scattered tables; schema not stable."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [],
+    "human_handoff_reasons": [
+      "Values embedded in narrative text cannot be reliably extracted",
+      "Chart placeholders are non-data",
+      "Undefined abbreviations (e.g., CAC) require clarification",
+      "Multiple unrelated sections on same sheet"
+    ]
+  },
+  "processing_expected": {
+    "status_without_inputs": "human_recommended",
+    "status_with_inputs": "human_recommended",
+    "status_default": "human_recommended",
+    "assumptions_used": "Expected workbook is an ideal human-structured target; not guaranteed for automation.",
+    "expected_output_sheets": [
+      "normalized_facts",
+      "metadata_notes",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Human extract KPI tables and appendix metrics",
+      "Preserve narrative and unresolved abbreviations in metadata/review"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "normalized_facts row count equals 8",
+          "expected": 8
+        }
+      ],
+      "sum_checks": [],
+      "mapping_checks": [
+        {
+          "check": "processing_expected_status = human_recommended",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": true
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "document_like",
+      "sheet_name": "Executive Summary",
+      "description": "Merged narrative text blocks",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "chart_placeholder",
+      "sheet_name": "Executive Summary",
+      "description": "Chart placeholder merged block",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "undefined_abbreviation",
+      "sheet_name": "Executive Summary",
+      "description": "CAC meaning missing",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "scattered_tables",
+      "sheet_name": "Executive Summary",
+      "description": "Multiple small tables laid out side-by-side",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    }
+  ]
+}

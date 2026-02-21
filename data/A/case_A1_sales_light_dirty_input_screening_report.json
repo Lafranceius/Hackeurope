@@ -1,0 +1,53 @@
+{
+  "file_path": "data/A/case_A1_sales_light_dirty_input.xlsx",
+  "file_hash": "e68fbd9e04642ce8aaf8e8bb67a9a74d7974dd0e8db06cad77900de0d15448f6",
+  "timestamp": "2026-02-21T23:38:44.067428",
+  "risk_mode": "medium",
+  "workbook_summary": {
+    "filename": "case_A1_sales_light_dirty_input.xlsx",
+    "file_path": "data/A/case_A1_sales_light_dirty_input.xlsx",
+    "file_size": 7584,
+    "extension": ".xlsx",
+    "file_hash": "e68fbd9e04642ce8aaf8e8bb67a9a74d7974dd0e8db06cad77900de0d15448f6",
+    "sheet_names": [
+      "Sales Data"
+    ],
+    "hidden_sheets": [],
+    "total_merged_cells": 0,
+    "total_formulas": 0
+  },
+  "sheet_summaries": [
+    {
+      "sheet_name": "Sales Data",
+      "used_range": "A1:X36",
+      "blank_rows": 3,
+      "blank_cols": 0,
+      "merged_cells_count": 0,
+      "comments_count": 0,
+      "formulas_count": 0,
+      "probable_title_rows": 1,
+      "document_like": false
+    }
+  ],
+  "detected_tables": [
+    {
+      "sheet_name": "Sales Data",
+      "range_ref": "A1:Z100",
+      "tabularity_score": 0.9,
+      "header_row_index": 0,
+      "header_confidence": 0.95
+    }
+  ],
+  "issues": [],
+  "hard_gate_triggers": [],
+  "category": "A",
+  "overall_confidence": 0.85,
+  "requires_uploader_input": [],
+  "review_requirements": [],
+  "recommended_processing_route": "normalizer",
+  "safe_actions_possible": [
+    "extract_tables",
+    "normalize_headers"
+  ],
+  "screening_notes": "Automated screening completed."
+}

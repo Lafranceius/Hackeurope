@@ -1,0 +1,55 @@
+{
+  "source_file": "data/B/case_B1_transactions_ambiguous_dates_input.xlsx",
+  "output_file": "data/B/case_B1_transactions_ambiguous_dates_input_processed.xlsx",
+  "status": "success",
+  "processing_plan": {
+    "source_file": "data/B/case_B1_transactions_ambiguous_dates_input.xlsx",
+    "screening_report_ref": "9ce2e0cff3ff17b7c34aed2d6461107906cbc9867d16e97347ea306648bd5cc8",
+    "selected_route": "hybrid",
+    "assumptions": [
+      "Headers are in the first row"
+    ],
+    "user_inputs_used": {
+      "date_format": "DD/MM/YYYY"
+    },
+    "target_output_sheets": [
+      "Card Export_clean"
+    ],
+    "planned_transforms": [
+      "extract_tables",
+      "normalize_headers",
+      "normalize_values"
+    ],
+    "planned_validations": [
+      "row_count_check",
+      "type_check"
+    ],
+    "review_policy": "standard",
+    "stop_conditions": [
+      "critical_parse_error"
+    ],
+    "rollback_strategy": "abort_and_keep_original"
+  },
+  "executed_transforms": [
+    {
+      "transform_name": "normalize_headers",
+      "status": "success",
+      "details": "Renamed columns from ['Corporate Card Transactions', 'Unnamed: 1', 'Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4', 'Unnamed: 5'] to ['corporate_card_transactions', 'unnamed:_1', 'unnamed:_2', 'unnamed:_3', 'unnamed:_4', 'unnamed:_5']"
+    },
+    {
+      "transform_name": "normalize_values",
+      "status": "success",
+      "details": "Stripped whitespace from string columns"
+    }
+  ],
+  "technical_verification": {
+    "status": "passed"
+  },
+  "semantic_verification": {
+    "status": "passed"
+  },
+  "review_flags": [],
+  "errors": [],
+  "warnings": [],
+  "summary_for_user": "Processing completed successfully."
+}

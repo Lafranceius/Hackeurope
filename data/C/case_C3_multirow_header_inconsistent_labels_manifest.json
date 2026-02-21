@@ -1,0 +1,92 @@
+{
+  "case_id": "case_C3_multirow_header_inconsistent_labels",
+  "title": "Multi-row header + inconsistent product labels + totals",
+  "category": "C",
+  "degree_of_dirtyness": 4,
+  "domain": "finance_reporting",
+  "source_workbook_filename": "case_C3_multirow_header_inconsistent_labels_input.xlsx",
+  "expected_workbook_filename": "case_C3_multirow_header_inconsistent_labels_expected_clean.xlsx",
+  "screening_expected": {
+    "category": "C",
+    "confidence_range": "70-88",
+    "hard_gate_triggers": [],
+    "key_reasons": [
+      "Multi-row headers + alias normalization + total row removal require heuristics; review required."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [
+      "Confirm reconstructed month columns match the intended months",
+      "Confirm TOTAL row excluded",
+      "Review product alias mapping coverage"
+    ],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "needs_review",
+    "status_with_inputs": "needs_review",
+    "status_default": "needs_review",
+    "assumptions_used": "Combined quarter and month headers; dropped TOTAL row; unpivoted; applied curated dummy alias mapping.",
+    "expected_output_sheets": [
+      "product_monthly_revenue_clean",
+      "mapping_tables",
+      "review_required",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Reconstruct two-row header into month labels",
+      "Remove TOTAL row",
+      "Unpivot wide month columns to long",
+      "Normalize product labels via alias mapping"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "product_monthly_revenue_clean row count equals 42",
+          "expected": 42
+        }
+      ],
+      "sum_checks": [
+        {
+          "check": "sum(revenue_usd) equals expected",
+          "sheet": "product_monthly_revenue_clean",
+          "column": "revenue_usd",
+          "expected_sum": 1513525.26
+        }
+      ],
+      "mapping_checks": [
+        {
+          "check": "mapping_tables has >= 1 alias per canonical product",
+          "expected_min": 6
+        }
+      ],
+      "review_queue_expected": true
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "multi_row_header",
+      "sheet_name": "Revenue",
+      "description": "Quarter row merged over month columns",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "inconsistent_labels",
+      "sheet_name": "Revenue",
+      "description": "Product labels vary (e.g., WIDG-A vs Widget A)",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "total_row",
+      "sheet_name": "Revenue",
+      "description": "TOTAL row at bottom",
+      "severity": "moderate",
+      "affects_screening": false,
+      "affects_processing": true
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "case_id": "case_A3_supplier_master_clean_baseline",
+  "title": "Supplier master (already clean baseline)",
+  "category": "A",
+  "degree_of_dirtyness": 0,
+  "domain": "master_data",
+  "source_workbook_filename": "case_A3_supplier_master_clean_baseline_input.xlsx",
+  "expected_workbook_filename": "case_A3_supplier_master_clean_baseline_expected_clean.xlsx",
+  "screening_expected": {
+    "category": "A",
+    "confidence_range": "95-99",
+    "hard_gate_triggers": [],
+    "key_reasons": [
+      "Already clean baseline; only minimal type coercion needed."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "success",
+    "status_with_inputs": "success",
+    "status_default": "success",
+    "assumptions_used": "Y/N mapped to boolean TRUE/FALSE in is_active.",
+    "expected_output_sheets": [
+      "suppliers_clean",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Validate schema and types",
+      "Coerce is_active from Y/N to TRUE/FALSE"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "suppliers_clean row count equals 25",
+          "expected": 25
+        }
+      ],
+      "sum_checks": [],
+      "mapping_checks": [
+        {
+          "check": "is_active contains only TRUE/FALSE",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": false
+    }
+  },
+  "dirty_issues_present": []
+}

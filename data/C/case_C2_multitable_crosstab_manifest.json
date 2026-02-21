@@ -1,0 +1,103 @@
+{
+  "case_id": "case_C2_multitable_crosstab",
+  "title": "Multi-table sheet with crosstab + footnotes",
+  "category": "C",
+  "degree_of_dirtyness": 4,
+  "domain": "sales_and_marketing",
+  "source_workbook_filename": "case_C2_multitable_crosstab_input.xlsx",
+  "expected_workbook_filename": "case_C2_multitable_crosstab_expected_clean.xlsx",
+  "screening_expected": {
+    "category": "C",
+    "confidence_range": "70-88",
+    "hard_gate_triggers": [],
+    "key_reasons": [
+      "Two tables on one sheet plus a crosstab requires table detection and unpivot; should be reviewed."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [
+      "Verify table boundaries for Table 1 and Table 2",
+      "Confirm 'Total' column was excluded from unpivot",
+      "Confirm month representation (YYYY-MM-01) is acceptable"
+    ],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "needs_review",
+    "status_with_inputs": "needs_review",
+    "status_default": "needs_review",
+    "assumptions_used": "Detected two tables separated by spacer rows; unpivoted months-as-columns; dropped Total column; preserved footnotes.",
+    "expected_output_sheets": [
+      "sales_by_region_month_clean",
+      "marketing_spend_clean",
+      "review_required",
+      "metadata_notes",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Detect multiple tables on a sheet",
+      "Unpivot sales crosstab to long format",
+      "Parse currency text to numeric",
+      "Preserve footnotes in metadata_notes"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "sales_by_region_month_clean row count equals 24",
+          "expected": 24
+        },
+        {
+          "check": "marketing_spend_clean row count equals 24",
+          "expected": 24
+        }
+      ],
+      "sum_checks": [
+        {
+          "check": "sum(sales_usd) equals expected total",
+          "sheet": "sales_by_region_month_clean",
+          "column": "sales_usd",
+          "expected_sum": 1686418.1
+        },
+        {
+          "check": "sum(spend_usd) equals expected total",
+          "sheet": "marketing_spend_clean",
+          "column": "spend_usd",
+          "expected_sum": 314872.73
+        }
+      ],
+      "mapping_checks": [
+        {
+          "check": "review_required present",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": true
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "multiple_tables",
+      "sheet_name": "Ops Summary",
+      "description": "Two distinct tables on one sheet",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "crosstab_unpivot",
+      "sheet_name": "Ops Summary",
+      "description": "Months as columns require unpivot",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "footnotes",
+      "sheet_name": "Ops Summary",
+      "description": "Footnotes at bottom to preserve",
+      "severity": "moderate",
+      "affects_screening": false,
+      "affects_processing": true
+    }
+  ]
+}

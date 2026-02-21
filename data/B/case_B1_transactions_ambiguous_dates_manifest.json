@@ -1,0 +1,74 @@
+{
+  "case_id": "case_B1_transactions_ambiguous_dates",
+  "title": "Transactions with ambiguous date locale",
+  "category": "B",
+  "degree_of_dirtyness": 2,
+  "domain": "transactions",
+  "source_workbook_filename": "case_B1_transactions_ambiguous_dates_input.xlsx",
+  "expected_workbook_filename": "case_B1_transactions_ambiguous_dates_expected_clean_ddmmyyyy.xlsx",
+  "screening_expected": {
+    "category": "B",
+    "confidence_range": "85-95",
+    "hard_gate_triggers": [
+      "ambiguous_date_locale"
+    ],
+    "key_reasons": [
+      "Date strings are ambiguous (##/##/##) and locale is not specified."
+    ],
+    "uploader_questions": [
+      "Are dates in this file DD/MM/YY or MM/DD/YY?"
+    ],
+    "review_requirements": [],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "needs_input",
+    "status_with_inputs": "success",
+    "status_default": "success",
+    "assumptions_used": "Assumed uploader answer: dates are DD/MM/YY (e.g., 03/04/24 = 3 April 2024).",
+    "expected_output_sheets": [
+      "transactions_clean",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Detect ambiguous date pattern and block for uploader input",
+      "Parse dates using uploader-specified locale (DD/MM/YY) -> ISO",
+      "Parse amounts (strip currency symbols) -> numeric",
+      "Trim merchant text and normalize missing memo tokens"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "transactions_clean row count equals 30",
+          "expected": 30
+        }
+      ],
+      "sum_checks": [
+        {
+          "check": "sum(amount) equals expected",
+          "sheet": "transactions_clean",
+          "column": "amount",
+          "expected_sum": 6550.72
+        }
+      ],
+      "mapping_checks": [
+        {
+          "check": "all txn_date are valid ISO dates",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": false
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "ambiguous_dates",
+      "sheet_name": "Card Export",
+      "description": "Dates like 03/04/24 could be DD/MM or MM/DD",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    }
+  ]
+}

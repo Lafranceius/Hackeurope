@@ -1,0 +1,78 @@
+{
+  "case_id": "case_D2_broken_export_misaligned_columns",
+  "title": "Broken export with mid-sheet column shifts (misaligned)",
+  "category": "D",
+  "degree_of_dirtyness": 5,
+  "domain": "transactions",
+  "source_workbook_filename": "case_D2_broken_export_misaligned_columns_input.xlsx",
+  "expected_workbook_filename": "case_D2_broken_export_misaligned_columns_expected_human_structured.xlsx",
+  "screening_expected": {
+    "category": "D",
+    "confidence_range": "80-95",
+    "hard_gate_triggers": [
+      "misaligned_columns",
+      "schema_break_mid_sheet"
+    ],
+    "key_reasons": [
+      "Mid-sheet column shift causes values under wrong headers; automated repair is risky."
+    ],
+    "uploader_questions": [],
+    "review_requirements": [],
+    "human_handoff_reasons": [
+      "No reliable delimiter to detect shift point without heuristics",
+      "Multiple plausible realignments for shifted rows",
+      "Risk of silently corrupting financial amounts"
+    ]
+  },
+  "processing_expected": {
+    "status_without_inputs": "human_recommended",
+    "status_with_inputs": "human_recommended",
+    "status_default": "human_recommended",
+    "assumptions_used": "Expected workbook is a human-corrected target after manual realignment.",
+    "expected_output_sheets": [
+      "transactions_clean_human",
+      "metadata_notes",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Human diagnose shift point",
+      "Human realign shifted values to correct columns",
+      "Validate amount numeric and currency code"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "transactions_clean_human row count equals 35",
+          "expected": 35
+        }
+      ],
+      "sum_checks": [],
+      "mapping_checks": [
+        {
+          "check": "no non-numeric values in amount column",
+          "expected": true
+        }
+      ],
+      "review_queue_expected": true
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "column_shift",
+      "sheet_name": "GL Export",
+      "description": "Rows after ~22 have shifted columns and spill into an extra column",
+      "severity": "extreme",
+      "affects_screening": true,
+      "affects_processing": true
+    },
+    {
+      "issue_type": "missing_fields",
+      "sheet_name": "GL Export",
+      "description": "Description missing for shifted rows",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    }
+  ]
+}

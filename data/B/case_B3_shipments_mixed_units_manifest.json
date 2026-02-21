@@ -1,0 +1,76 @@
+{
+  "case_id": "case_B3_shipments_mixed_units",
+  "title": "Shipments with mixed weight units (no conversion policy)",
+  "category": "B",
+  "degree_of_dirtyness": 3,
+  "domain": "logistics",
+  "source_workbook_filename": "case_B3_shipments_mixed_units_input.xlsx",
+  "expected_workbook_filename": "case_B3_shipments_mixed_units_expected_clean_unitpolicy_kg.xlsx",
+  "screening_expected": {
+    "category": "B",
+    "confidence_range": "80-92",
+    "hard_gate_triggers": [
+      "mixed_units_no_policy"
+    ],
+    "key_reasons": [
+      "Weight field contains mixed units (kg/g/lb) embedded in text; canonical unit and rounding policy are not specified."
+    ],
+    "uploader_questions": [
+      "What is the preferred canonical unit for weight (kg, g, lb)?",
+      "What rounding policy should be used for converted weights (e.g., 3 decimals)?"
+    ],
+    "review_requirements": [],
+    "human_handoff_reasons": []
+  },
+  "processing_expected": {
+    "status_without_inputs": "needs_input",
+    "status_with_inputs": "success",
+    "status_default": "success",
+    "assumptions_used": "Assumed uploader answer: canonical weight unit = kg; round converted weights to 3 decimals.",
+    "expected_output_sheets": [
+      "shipments_clean",
+      "mapping_tables",
+      "data_catalog",
+      "processing_log"
+    ],
+    "key_transformations": [
+      "Detect mixed units in weight field and block for uploader input",
+      "Parse numeric weight + unit from strings",
+      "Convert to canonical kg using mapping_tables conversion factors",
+      "Apply rounding policy (3 decimals)"
+    ],
+    "verification_expectations": {
+      "row_count_checks": [
+        {
+          "check": "shipments_clean row count equals 26",
+          "expected": 26
+        }
+      ],
+      "sum_checks": [
+        {
+          "check": "sum(weight_kg) equals expected",
+          "sheet": "shipments_clean",
+          "column": "weight_kg",
+          "expected_sum": 422.638
+        }
+      ],
+      "mapping_checks": [
+        {
+          "check": "mapping_tables includes kg,g,lb multipliers",
+          "expected": 3
+        }
+      ],
+      "review_queue_expected": false
+    }
+  },
+  "dirty_issues_present": [
+    {
+      "issue_type": "mixed_units",
+      "sheet_name": "Shipments",
+      "description": "Weight strings like '500g', '2.5 kg', '8lb'",
+      "severity": "high",
+      "affects_screening": true,
+      "affects_processing": true
+    }
+  ]
+}
