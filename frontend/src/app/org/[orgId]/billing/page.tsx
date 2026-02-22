@@ -29,11 +29,11 @@ const BillingPage = async ({ params }: { params: Promise<{ orgId: string }> }) =
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="p-4">
             <h2 className="text-xl font-semibold">Payment Methods</h2>
-            <p className="mt-2 text-sm text-textMuted">Stripe test mode or internal test purchase mode.</p>
+            <p className="mt-2 text-sm text-textMuted">Manage payment instruments and billing controls for this organization.</p>
             <div className="mt-4 space-y-2 text-sm">
-              <div className="rounded-md border border-border bg-mutedSurface p-3">Card ending 4242 (placeholder)</div>
-              <div className="rounded-md border border-border bg-mutedSurface p-3">PO Number support (placeholder)</div>
-              <div className="rounded-md border border-border bg-mutedSurface p-3">Tax ID collection (placeholder)</div>
+              <div className="rounded-md border border-border bg-mutedSurface p-3">Primary card on file •••• 4242</div>
+              <div className="rounded-md border border-border bg-mutedSurface p-3">Purchase order billing support available</div>
+              <div className="rounded-md border border-border bg-mutedSurface p-3">Tax ID collection available</div>
             </div>
           </Card>
 

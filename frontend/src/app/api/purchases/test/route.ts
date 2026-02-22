@@ -8,7 +8,9 @@ import { requireOrgAccess, requireUser } from "@/server/session";
 const purchaseSchema = z.object({
   buyerOrgId: z.string().min(1),
   datasetId: z.string().min(1),
-  planId: z.string().min(1)
+  planId: z.string().min(1),
+  amount: z.number().positive().optional(),
+  rowCount: z.string().optional()
 });
 
 export const POST = async (request: Request) =>
@@ -22,7 +24,8 @@ export const POST = async (request: Request) =>
       actorUserId: user.id,
       buyerOrgId: payload.buyerOrgId,
       datasetId: payload.datasetId,
-      planId: payload.planId
+      planId: payload.planId,
+      overrideInvoiceAmount: payload.amount
     });
 
     return purchase;
