@@ -163,6 +163,32 @@ export const createBidSchema = z
     }
   });
 
+// ---------------------------------------------------------------------------
+// Dynamic Pricing
+// ---------------------------------------------------------------------------
+
+export const updatePricingConfigSchema = z.object({
+  orgId: z.string().min(1),
+  autoPricingEnabled: z.boolean().optional(),
+  minPrice: z.number().min(0).optional(),
+  maxPrice: z.number().positive().optional(),
+  maxWeeklyChangePct: z.number().int().min(1).max(50).optional()
+});
+
+export const applyPriceSchema = z.object({
+  orgId: z.string().min(1),
+  snapshotId: z.string().min(1),
+  reason: z.string().optional()
+});
+
+export const pricingPreviewSchema = z.object({
+  qualityPercent: z.number().min(0).max(100),
+  complexityTag: z.enum(["A", "B", "C", "D"]),
+  cleaningCostUsd: z.number().min(0),
+  categories: z.array(z.string()).optional(),
+  currentPriceUsd: z.number().positive().optional()
+});
+
 export const createMessageSchema = z.object({
   threadId: z.string().min(1),
   body: z.string().min(1).max(5000)

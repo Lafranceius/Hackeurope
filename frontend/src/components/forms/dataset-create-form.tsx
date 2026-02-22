@@ -74,6 +74,11 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
   const [assessmentLoading, setAssessmentLoading] = useState(false);
   const [assessmentError, setAssessmentError] = useState<string | null>(null);
   const [assessment, setAssessment] = useState<DatasetAssessmentResult | null>(null);
+  const [planPrice, setPlanPrice] = useState(5000);
+  const [pricingPreview, setPricingPreview] = useState<{
+    recommendedOneTimePriceUsd: number;
+    explanationFactors: string[];
+  } | null>(null);
 
   const clearFileState = () => {
     setSelectedFile(null);
@@ -81,6 +86,7 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
     setUploadError(null);
     setAssessment(null);
     setAssessmentError(null);
+    setPricingPreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -105,7 +111,29 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
       return;
     }
 
-    setAssessment(result.data as DatasetAssessmentResult);
+    const assessmentData = result.data as DatasetAssessmentResult;
+    setAssessment(assessmentData);
+
+    // Fetch pricing preview (best-effort; only if feature is enabled on server)
+    try {
+      const previewRes = await fetch("/api/pricing/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          qualityPercent: assessmentData.PLACEHOLDER_QUALITY_PERCENT,
+          complexityTag: assessmentData.PLACEHOLDER_COMPLEXITY_TAG,
+          cleaningCostUsd: assessmentData.PLACEHOLDER_CLEANING_COST_USD
+        })
+      });
+      if (previewRes.ok) {
+        const previewBody = await previewRes.json();
+        if (previewBody.ok && previewBody.data) {
+          setPricingPreview(previewBody.data);
+        }
+      }
+    } catch {
+      // Non-critical: pricing preview is optional
+    }
   };
 
   const handleFileUpload = async (file: File) => {
@@ -324,6 +352,38 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
 
           {assessment ? (
             <div className="space-y-4">
+              {pricingPreview ? (
+                <div className="rounded-md border border-brand/25 bg-blue-50/40 p-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-textPrimary">
+                      Suggested starting price:{" "}
+                      <span className="text-brand">
+                        ${pricingPreview.recommendedOneTimePriceUsd.toLocaleString()}
+                      </span>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setPlanPrice(pricingPreview.recommendedOneTimePriceUsd)}
+                      className="ml-3 rounded-md border border-brand/30 bg-white px-2 py-1 text-xs font-medium text-brand hover:bg-blue-50"
+                    >
+                      Use this price
+                    </button>
+                  </div>
+                  {pricingPreview.explanationFactors.length > 0 && (
+                    <ul className="mt-2 space-y-0.5 text-textMuted">
+                      {pricingPreview.explanationFactors.map((f, i) => (
+                        <li key={i} className="flex items-center gap-1.5">
+                          <span className="inline-block h-1 w-1 rounded-full bg-brand/60" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <p className="mt-2 text-xs text-textMuted">
+                    Based on assessment results. Refine on the dataset detail page once published.
+                  </p>
+                </div>
+              ) : null}
               <div>
                 <div className="mb-2 flex items-center justify-between text-sm">
                   <span className="font-medium text-textSecondary">Data quality</span>
@@ -405,7 +465,14 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
         </div>
         <div>
           <label className="field-label">Price (USD)</label>
-          <Input name="planPrice" type="number" min={1} defaultValue={5000} required />
+          <Input
+            name="planPrice"
+            type="number"
+            min={1}
+            value={planPrice}
+            onChange={(e) => setPlanPrice(Number(e.target.value))}
+            required
+          />
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">

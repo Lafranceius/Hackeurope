@@ -8,9 +8,11 @@ import { TopNav } from "@/components/layout/top-nav";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { WarningBanner } from "@/components/ui/warning-banner";
+import { DatasetPricingPanel } from "@/components/pricing/dataset-pricing-panel";
 import { prisma } from "@/lib/prisma";
 import { env } from "@/server/env";
 import { requirePageSession } from "@/server/page-auth";
+import { getOrComputeRecommendation } from "@/server/services/dynamic-pricing";
 
 const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: string }> }) => {
   const user = await requirePageSession();
@@ -52,6 +54,35 @@ const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: stri
   const isSeller = user.memberships.some((membership) => membership.orgId === dataset.orgId);
   const entitlement = dataset.purchases[0]?.entitlement;
   const invoice = dataset.purchases[0]?.invoice;
+
+  // Load dynamic pricing data for the seller (feature-flagged)
+  let pricingSnapshot: Awaited<ReturnType<typeof getOrComputeRecommendation>> | null = null;
+  let pricingConfig: {
+    id: string;
+    autoPricingEnabled: boolean;
+    minPrice: number;
+    maxPrice: number;
+    maxWeeklyChangePct: number;
+    lastAppliedAt: string | null;
+  } | null = null;
+
+  if (isSeller && env.dynamicPricingEnabled) {
+    const [snap, cfg] = await Promise.all([
+      getOrComputeRecommendation(datasetId).catch(() => null),
+      prisma.datasetPricingConfig.findUnique({ where: { datasetId } })
+    ]);
+    pricingSnapshot = snap;
+    if (cfg) {
+      pricingConfig = {
+        id: cfg.id,
+        autoPricingEnabled: cfg.autoPricingEnabled,
+        minPrice: cfg.minPrice.toNumber(),
+        maxPrice: cfg.maxPrice.toNumber(),
+        maxWeeklyChangePct: cfg.maxWeeklyChangePct,
+        lastAppliedAt: cfg.lastAppliedAt?.toISOString() ?? null
+      };
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -162,6 +193,29 @@ const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: stri
                 <DatasetPublishActions datasetId={dataset.id} orgId={dataset.orgId} status={dataset.status} />
               </div>
             </Card>
+          ) : null}
+          {isSeller && env.dynamicPricingEnabled ? (
+            <DatasetPricingPanel
+              datasetId={dataset.id}
+              orgId={dataset.orgId}
+              currentOneTimePrice={
+                dataset.pricePlans.find((p) => p.type === "ONE_TIME")
+                  ? Number(dataset.pricePlans.find((p) => p.type === "ONE_TIME")!.price)
+                  : null
+              }
+              snapshot={
+                pricingSnapshot
+                  ? {
+                      id: pricingSnapshot.id,
+                      recommendedPrice: pricingSnapshot.recommendedPrice.toNumber(),
+                      appliedPrice: pricingSnapshot.appliedPrice?.toNumber() ?? null,
+                      explanationJson: pricingSnapshot.explanationJson,
+                      computedAt: pricingSnapshot.computedAt.toISOString()
+                    }
+                  : null
+              }
+              config={pricingConfig}
+            />
           ) : null}
           <Card className="p-4">
             <h3 className="font-semibold">Moderation</h3>
