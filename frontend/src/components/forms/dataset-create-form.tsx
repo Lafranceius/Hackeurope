@@ -421,25 +421,7 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
                 </span>
               </div>
 
-              {/* Issues */}
-              {assessment.issues && assessment.issues.length > 0 ? (
-                <div className="rounded-md border border-border p-3 text-sm">
-                  <p className="mb-2 font-medium text-textPrimary">Issues found</p>
-                  <ul className="space-y-1">
-                    {assessment.issues.map((issue, i) => (
-                      <li key={i} className="flex items-start gap-2 text-textSecondary">
-                        <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-warning" />
-                        {issue}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : assessment.agentAssessed ? (
-                <div className="rounded-md border border-[#ccead6] bg-success-soft p-3 text-sm">
-                  <p className="font-medium text-success">No significant issues found</p>
-                  <p className="mt-0.5 text-textMuted">Dataset appears well-structured and clean.</p>
-                </div>
-              ) : null}
+              {/* Issues removed as requested */}
 
               {/* Suggested price (auto-applied, shown as info) */}
               <div className="flex items-center justify-between rounded-md border border-brand/25 bg-blue-50/40 p-3 text-sm">

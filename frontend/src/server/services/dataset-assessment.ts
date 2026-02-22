@@ -148,9 +148,9 @@ const toolImplementations: Record<string, ToolFn> = {
     const n = nonNulls.length || 1;
     const inferredType =
       numericCount / n > 0.85 ? "numeric"
-      : dateCount / n > 0.85 ? "date"
-      : numericCount / n > 0.3 ? "mixed (text + numeric)"
-      : "text";
+        : dateCount / n > 0.85 ? "date"
+          : numericCount / n > 0.3 ? "mixed (text + numeric)"
+            : "text";
 
     return {
       column: name,
@@ -207,9 +207,9 @@ const toolImplementations: Record<string, ToolFn> = {
     const dominant = Math.max(numeric, dates, booleans, text);
     const dominantType =
       dominant === numeric ? "numeric"
-      : dominant === dates ? "date"
-      : dominant === booleans ? "boolean"
-      : "text";
+        : dominant === dates ? "date"
+          : dominant === booleans ? "boolean"
+            : "text";
 
     return {
       column: name,
@@ -414,9 +414,9 @@ const runDeterministicAssessment = (sample: ParsedSample, fileName: string): Age
 
   const complexityTag: PlaceholderComplexityTag =
     qualityPercent >= 85 ? "A"
-    : qualityPercent >= 70 ? "B"
-    : qualityPercent >= 55 ? "C"
-    : "D";
+      : qualityPercent >= 70 ? "B"
+        : qualityPercent >= 55 ? "C"
+          : "D";
 
   // Cleaning cost scales with number and severity of recommendations
   const cleaningCostUsd = Math.round(
@@ -439,8 +439,8 @@ const runDeterministicAssessment = (sample: ParsedSample, fileName: string): Age
     recommendations.length === 0
       ? `${sample.fileType} with ${colCount} columns and ${rowCount} rows — data looks clean, no significant issues found.`
       : qualityPercent >= 70
-      ? `${sample.fileType} with ${colCount} columns and ${rowCount} rows — ${recommendations.length} issue${recommendations.length > 1 ? "s" : ""} found, standard cleaning recommended.`
-      : `${sample.fileType} with ${colCount} columns and ${rowCount} rows — ${recommendations.length} issues found, significant cleaning needed before use.`;
+        ? `${sample.fileType} with ${colCount} columns and ${rowCount} rows — ${recommendations.length} issue${recommendations.length > 1 ? "s" : ""} found, standard cleaning recommended.`
+        : `${sample.fileType} with ${colCount} columns and ${rowCount} rows — ${recommendations.length} issues found, significant cleaning needed before use.`;
 
   return {
     qualityPercent,
@@ -464,10 +464,10 @@ export const assessDatasetFile = async (input: DatasetAssessmentInput): Promise<
 
   const findings = runDeterministicAssessment(sample, fileName);
 
-  // Improved quality = what the dataset could reach after the recommended cleaning
-  const improvedQuality = Math.min(
-    95,
-    findings.qualityPercent + Math.round(8 + (100 - findings.qualityPercent) * 0.22)
+  // The program should aim at cleaning it up to 80%, so if it's below 80, bump it to 80, otherwise let it reach higher.
+  const improvedQuality = Math.max(
+    80,
+    Math.min(95, findings.qualityPercent + Math.round(8 + (100 - findings.qualityPercent) * 0.22))
   );
 
   console.log(
