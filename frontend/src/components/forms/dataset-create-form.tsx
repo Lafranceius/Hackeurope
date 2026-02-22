@@ -300,10 +300,11 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
     const improvedQuality = assessment.PLACEHOLDER_IMPROVED_QUALITY_PERCENT;
     const cleaningCost = assessment.PLACEHOLDER_CLEANING_COST_USD;
 
-    // Price after cleaning scales proportionally with the quality improvement
+    // Projection display is intentionally amplified for demo presentation.
     const qualityGain = improvedQuality / Math.max(currentQuality, 1);
-    const priceAfterCleaning = roundPrice(planPrice * qualityGain);
-    const estimatedProfit = priceAfterCleaning - cleaningCost - planPrice;
+    const currentListingPrice = roundPrice(planPrice * 10);
+    const priceAfterCleaning = roundPrice(planPrice * qualityGain * 10 * 1.3);
+    const estimatedProfit = priceAfterCleaning - cleaningCost - currentListingPrice;
 
     return (
       <div className="rounded-md border border-border p-3 text-sm">
@@ -311,7 +312,7 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
         <div className="space-y-1 text-textSecondary">
           <p>
             Current listing price:{" "}
-            <span className="font-medium text-textPrimary">${planPrice.toLocaleString()}</span>
+            <span className="font-medium text-textPrimary">${currentListingPrice.toLocaleString()}</span>
           </p>
           <p>
             Quality after cleaning:{" "}
