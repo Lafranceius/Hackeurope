@@ -1,4 +1,5 @@
 import re
+from typing import Literal
 
 import dateparser
 import pandas as pd
@@ -8,7 +9,20 @@ mcp = FastMCP("data-formatting-tools")
 
 
 @mcp.tool()
-def execute_time_formatting(file_path: str, col_name: str, target_format: str) -> str:
+def execute_time_formatting(
+    file_path: str,
+    col_name: str,
+    target_format: Literal[
+        "%H:%M",
+        "%H:%M:%S",
+        "%S",
+        "%d/%m/%Y",
+        "%d/%m/%Y %H:%M",
+        "%d/%m/%Y %H:%M:%S",
+        "%m/%Y",
+        "%Y",
+    ],
+) -> str:
     """Format a time/date column in an Excel file to a specific target format.
 
     Args:
@@ -89,8 +103,8 @@ def execute_money_formatting(
     col_name: str,
     is_mixed_currency: bool,
     detected_currency: str,
-    scale_decision: str,
-    decimal_separator: str,
+    scale_decision: Literal["None", "Thousands", "Millions", "Billions"],
+    decimal_separator: Literal[".", ","],
 ) -> str:
     """Format a money/financial column in an Excel file.
 
@@ -256,8 +270,54 @@ def execute_int_formatting(file_path: str, col_name: str) -> str:
 
 
 @mcp.tool()
+def execute_float_formatting(file_path: str, col_name: str) -> str:
+    """Standardize floats for a column.
+
+    Args:
+        file_path: Path to the Excel file.
+        col_name: Name of the column to format.
+    """
+    print(f"       [Tool Executing] Standardizing floats for '{col_name}'...")
+    try:
+        df = pd.read_excel(file_path)
+
+        def extract_float(val):
+            if pd.isna(val):
+                return pd.NA
+            val_str = str(val).lower().replace(",", "").strip()
+            try:
+                return float(val_str)
+            except ValueError:
+                return pd.NA
+
+        raw_floats = df[col_name].apply(extract_float)
+
+        max_decimals = 0
+        for val in raw_floats.dropna():
+            parts = str(val).split(".")
+            if len(parts) == 2:
+                decimals = len(parts[1])
+                if max_decimals < decimals:
+                    max_decimals = decimals
+
+        def pad_float(val):
+            if pd.isna(val):
+                return pd.NA
+            return f"{val:.{max_decimals}f}"
+
+        df[col_name] = raw_floats.apply(pad_float)
+        df.to_excel(file_path, index=False)
+        return f"Successfully formatted float column '{col_name}' to {max_decimals} decimal places."
+    except Exception as e:
+        return f"Error formatting floats: {e}"
+
+
+@mcp.tool()
 def execute_name_formatting(
-    file_path: str, col_name: str, entity_type: str, dominant_format: str
+    file_path: str,
+    col_name: str,
+    entity_type: Literal["Human Names", "Locations/Other"],
+    dominant_format: Literal["First Last", "Last First", "N/A"],
 ) -> str:
     """Standardize proper nouns/names in a column.
 

@@ -57,53 +57,81 @@ def get_columns(file_path: str) -> str:
 
 
 # 2. Define the Agents
+reader_agent = Agent(
+    name="Reader Agent",
+    instructions=(
+        "You are a precise data analysis agent. Your job is to classify columns in a dataset.\n"
+        "Use the `read_data_sample` tool to get a sample of the data.\n"
+        "For each column, determine its data type based on the values.\n"
+        "You are ONLY allowed to use these exact categories: 'time', 'money', 'int', 'string', 'float', 'name', 'unknown'.\n\n"
+        "CRITICAL DEFINITIONS:\n"
+        "- 'time': Includes standard formats (2023-01-01, 14:30), timestamps, AND natural language dates (e.g., 'first of january 2016', 'Q1 2024', 'yesterday'). If the core meaning represents a date or time, it is 'time', NEVER 'string'.\n"
+        "- 'money': Includes currency symbols ($100, €50), accounting formats, or financial abbreviations (100 USD) and natural language money expressions ('100 dollars', 'fifty euros'). If the core meaning represents a monetary value, it is 'money', NEVER 'string'.\n"
+        "- 'int': Whole numbers without decimals.\n"
+        "- 'float': Numbers containing decimals.\n"
+        "- 'name': Proper nouns. This includes human names (John Smith, Smith, John), cities, states (Alabama), or company names.\n"
+        "- 'string': General text, sentences, descriptions, or specific codes (e.g., ID-4552) that have no mathematical or temporal value.\n"
+        "- 'unknown': Use this ONLY if the column is complete gibberish or you cannot confidently assign it to any other category.\n\n"
+        "Return a clear mapping of column names to their classified types."
+    ),
+    tools=[read_data_sample],
+    model="gpt-4o-2024-08-06",
+)
+
 time_agent = Agent(
     name="Time Agent",
     instructions=(
-        "You are an expert data formatting agent specializing in time and dates. "
-        "When given a file and a column name, first use `read_column_sample` to look at the data. "
-        "Then, determine the appropriate standardized format based on its granularity: "
-        "'%H:%M', '%H:%M:%S', '%S', '%d/%m/%Y', '%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M:%S', '%m/%Y', or '%Y'. "
+        "You are an expert data formatting agent specializing in time and dates.\n"
+        "When given a file and a column name, first use `read_column_sample` to look at the data.\n"
+        "Determine the appropriate standardized format for this data based on its granularity:\n"
+        "- Hours and minutes: '%H:%M'\n"
+        "- Hours, minutes, and seconds: '%H:%M:%S'\n"
+        "- Just seconds: '%S'\n"
+        "- Specific dates: '%d/%m/%Y'\n"
+        "- Date and time: '%d/%m/%Y %H:%M'\n"
+        "- Date and exact time: '%d/%m/%Y %H:%M:%S'\n"
+        "- Month and year: '%m/%Y'\n"
+        "- Year only: '%Y'\n"
         "Finally, use the `execute_time_formatting` tool to apply the format."
     ),
-    model="gpt-4o-mini",
+    model="gpt-4o-2024-08-06",
 )
 
 money_agent = Agent(
     name="Money Agent",
     instructions=(
-        "You are a precise financial data standardization agent. "
-        "When given a file and a column name, first use `read_column_sample` to look at the data. "
-        "Determine: "
-        "1. The primary currency (e.g., 'USD', 'EUR'). "
-        "2. If it's mixed currency (True/False). "
-        "3. The best scale ('None', 'Thousands', 'Millions', 'Billions'). "
-        "4. The decimal separator ('.' or ','). "
+        "You are a precise financial data standardization agent.\n"
+        "When given a file and a column name, first use `read_column_sample` to look at the data.\n"
+        "Your task:\n"
+        "1. Identify the primary currency being used (e.g., $, USD, €, Yen, 'dollars', 'euros').\n"
+        "   - CRITICAL RULE: If a currency is specified even just once in the sample, and NO OTHER currencies are mentioned, assume that single currency applies to the entire column.\n"
+        "2. Set `is_mixed_currency` to True ONLY if you see multiple DIFFERENT currencies (e.g., 'dollars' in one row and 'eur' in another).\n"
+        "3. Determine the best scale ('None', 'Thousands', 'Millions', 'Billions').\n"
+        "   - Evaluate the TRUE underlying numerical value. '100 million' means 100,000,000.\n"
+        "   - If the true values are predominantly in the millions, you MUST choose 'Millions'.\n"
+        "4. Identify the decimal separator used in the numbers ('.' or ',').\n"
+        "   - WARNING: Commas that group thousands (like '200,000,000') are NOT decimal separators. If a comma groups thousands, the decimal separator is '.'.\n"
+        "   - Only choose ',' if the comma specifically separates fractional cents at the very end of the number (e.g., '1.500,00').\n"
         "Finally, use the `execute_money_formatting` tool to apply the formatting."
     ),
-    model="gpt-4o-mini",
-)
-
-int_agent = Agent(
-    name="Int Agent",
-    instructions=(
-        "You are an integer formatting agent. "
-        "When given a file and a column name, simply use the `execute_int_formatting` tool to clean and truncate the column to integers."
-    ),
-    model="gpt-4o-mini",
+    model="gpt-4o-2024-08-06",
 )
 
 name_agent = Agent(
     name="Name Agent",
     instructions=(
-        "You are a precise text standardization agent specializing in proper nouns. "
-        "When given a file and a column name, first use `read_column_sample` to look at the data. "
-        "Determine if it's 'Human Names' or 'Locations/Other'. "
-        "If 'Human Names', deduce the dominant format ('First Last' or 'Last First'). "
-        "If 'Locations/Other', use 'N/A' for format. "
+        "You are a precise text standardization agent specializing in proper nouns.\n"
+        "When given a file and a column name, first use `read_column_sample` to look at the data.\n"
+        "Your task:\n"
+        "1. Determine if this column primarily contains 'Human Names' or 'Locations/Other' (like cities, states, companies).\n"
+        "2. If it is 'Human Names', deduce the dominant structural format.\n"
+        "   - Are they mostly 'First Last' (e.g., John Smith)?\n"
+        "   - Are they mostly 'Last First' (e.g., Smith John)?\n"
+        "   - NOTE: If you see ambiguous names (like 'Harper Taylor'), look at the other names in the sample to deduce the pattern.\n"
+        "3. If it is 'Locations/Other', select 'N/A' for the format.\n"
         "Finally, use the `execute_name_formatting` tool to apply the formatting."
     ),
-    model="gpt-4o-mini",
+    model="gpt-4o-2024-08-06",
 )
 
 
@@ -122,28 +150,24 @@ async def run_agentic_pipeline(file_path: str):
         orchestrator = Agent(
             name="Data Pipeline Orchestrator",
             instructions=(
-                "You are the orchestrator of a data cleaning pipeline. "
-                "Follow these steps EXACTLY:\n"
-                "1. Use `get_columns` to get the list of columns in the file.\n"
-                "2. Use `read_data_sample` to look at a sample of the data.\n"
-                "3. For EACH column, determine its data type based on the sample. "
-                "   Categories: 'time', 'money', 'int', 'string', 'float', 'name', 'unknown'.\n"
-                "   - 'time': dates, times, natural language dates.\n"
-                "   - 'money': currency symbols, financial abbreviations.\n"
-                "   - 'int': whole numbers.\n"
-                "   - 'name': proper nouns, human names, locations.\n"
-                "   - 'string'/'float'/'unknown': ignore these.\n"
-                "4. For each column that needs formatting, delegate to the appropriate agent tool:\n"
-                "   - 'time' -> time_agent\n"
-                "   - 'money' -> money_agent\n"
-                "   - 'int' -> int_agent\n"
-                "   - 'name' -> name_agent\n"
-                "   Pass the file_path and col_name to the agent.\n"
-                "5. Summarize the actions taken."
+                "You are the orchestrator of a data cleaning pipeline. Follow these steps EXACTLY:\n"
+                "1. Use the `reader_agent` to classify the columns in the file.\n"
+                "2. For each column, based on its classified type, take the following action:\n"
+                "   - 'time': Delegate to `time_agent`.\n"
+                "   - 'money': Delegate to `money_agent`.\n"
+                "   - 'name': Delegate to `name_agent`.\n"
+                "   - 'int': Directly use the `execute_int_formatting` tool (do not use an agent).\n"
+                "   - 'float': Directly use the `execute_float_formatting` tool (do not use an agent).\n"
+                "   - 'string' or 'unknown': Bypass and do nothing.\n"
+                "   CRITICAL: For 'time', 'money', and 'name', you MUST delegate to the respective agents and NOT call the formatting tools directly.\n"
+                "3. Summarize the actions taken for each column."
             ),
             tools=[
                 get_columns,
-                read_data_sample,
+                reader_agent.as_tool(
+                    tool_name="reader_agent",
+                    tool_description="Classify the data types of columns in the file.",
+                ),
                 time_agent.as_tool(
                     tool_name="time_agent",
                     tool_description="Format time/date columns. Pass file_path and col_name.",
@@ -152,17 +176,13 @@ async def run_agentic_pipeline(file_path: str):
                     tool_name="money_agent",
                     tool_description="Format money/financial columns. Pass file_path and col_name.",
                 ),
-                int_agent.as_tool(
-                    tool_name="int_agent",
-                    tool_description="Format integer columns. Pass file_path and col_name.",
-                ),
                 name_agent.as_tool(
                     tool_name="name_agent",
                     tool_description="Format name/proper noun columns. Pass file_path and col_name.",
                 ),
             ],
             mcp_servers=[server],
-            model="gpt-4o-mini",
+            model="gpt-4o-2024-08-06",
         )
 
         time_agent.mcp_servers = [server]
@@ -170,8 +190,6 @@ async def run_agentic_pipeline(file_path: str):
 
         money_agent.mcp_servers = [server]
         money_agent.tools = [read_column_sample]
-
-        int_agent.mcp_servers = [server]
 
         name_agent.mcp_servers = [server]
         name_agent.tools = [read_column_sample]

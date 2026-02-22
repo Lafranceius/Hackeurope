@@ -20,10 +20,10 @@ def get_test_file(test_file_mcp: str = "cleaned_test_pipeline_mcp.xlsx") -> str:
 
 
 async def main(file_path: str):
-    test_file_path = get_test_file(file_path)
+    # test_file_path = get_test_file(file_path)
     # Run your pipeline on the uploaded file
-    await run_agentic_pipeline(test_file_path)
+    await run_agentic_pipeline(file_path)
 
 
-if __name__ == "__main__":
-    asyncio.run(main("cleaned_test_pipeline_mcp.xlsx"))
+# if __name__ == "__main__":
+#     asyncio.run(main("cleaned_test_pipeline_mcp.xlsx"))
