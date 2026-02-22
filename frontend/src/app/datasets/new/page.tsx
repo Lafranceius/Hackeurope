@@ -26,7 +26,7 @@ const NewDatasetPage = async () => {
         <h1 className="page-title">Publish New Dataset</h1>
         <p className="mt-2 text-textMuted">Create draft listing, attach schema preview, and configure pricing.</p>
         <div className="mt-6 grid gap-3 md:grid-cols-4">
-          {["Basic Info", "Connect Source", "Pricing", "Compliance"].map((step, index) => (
+          {["Basic Info"].map((step, index) => (
             <div
               key={step}
               className={`rounded-lg border p-4 ${index === 0 ? "border-brand bg-brandSoft" : "border-border bg-surface"}`}

@@ -1,0 +1,4 @@
+mac_address,firmware,last_heartbeat
+00:1A:2B:3C:4D:5E,1.0.4,2024-02-22T10:00:00Z
+00-1A-2B-3C-4D-5F,1.0.3,2024-02-22 10:05:00
+invalid_mac,v2,yesterday

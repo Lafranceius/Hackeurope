@@ -1,0 +1,16 @@
+First Name,last_name, AGE,Date of Birth,Email,Salary ,City,Country Code
+John,Doe,30,1994-01-15,john.doe@gmail.com,50000,New York,US
+john,doe,30,1994/01/15,john.doe@gmail.com,50000,new york,USA
+Alice,Smith,NaN,1985-05-12,alice.smith@example.com,"5,000",London,UK
+ Bob ,Brown,45,12/10/1978,bob.brown,70000,London,U.K.
+Charlie,Black,200,Unknown,charlie@black.com,5k,Paris,FR
+Eva,Green,28,1996-08-23,eva.green@net,NULL,Berlin,DE
+Frank,White,-5,2000-01-01,frank@white.com,45000,Tokio,JP
+Grace,Hopper,40,"Dec 9, 1906",grace@hopper.com,120000,New York City,US
+Henry,Ford,55,1863-07-30,,0,Detroit,US
+John,Doe,30,1994-01-15,john.doe@gmail.com,50000,New York,US
+Igor,Stravinsky,72,1882-06-17,igor@firebird.org,invalid,St. Petersburg,RU
+  Julia ,Roberts,56,"Oct 28, 1967",julia@hollywood.com,1000000,LA,USA
+Kevin,Spacey,null,,kevin@actor.com,N/A,London,UK
+Liam,Neeson,71,1952-06-07,taken@movie.com,"0,000.00",Ballymena,IE
+Mia,Wallace,24,1970-04-16,mia@pulp.com,999999999,LA,USA

@@ -1,0 +1,5 @@
+emp_id,dept,salary,bonus
+E001,Sales,60000,5000
+E002,Engineering,90000,0
+E003,HR,invalid,N/A
+E004,Sales,65000,
