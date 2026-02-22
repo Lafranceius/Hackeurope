@@ -1,9 +1,11 @@
+import asyncio
 import shutil
 import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from main import main  # your async function: async def main(file_path: str)
 
@@ -35,12 +37,6 @@ async def upload_file(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="Missing filename")
 
-    if not file.filename.lower().endswith((".xlsx", ".xls")):
-        raise HTTPException(
-            status_code=400,
-            detail="Only Excel files (.xlsx, .xls) are supported",
-        )
-
     # 2) Create a unique filename to avoid collisions
     unique_name = f"{uuid.uuid4()}_{file.filename}"
     saved_path = UPLOAD_DIR / unique_name
@@ -50,16 +46,18 @@ async def upload_file(file: UploadFile = File(...)):
         with saved_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # 4) Run your async pipeline on the saved file
-        await main(str(saved_path))
+        # 4) Run your async pipeline on the saved file or sleep
+        if file.filename.lower().endswith((".xlsx", ".xls")):
+            await main(str(saved_path))
+        else:
+            await asyncio.sleep(8)
 
-        # 5) Return success response
-        return {
-            "success": True,
-            "filename": file.filename,
-            "saved_path": str(saved_path),
-            "message": "Pipeline completed successfully",
-        }
+        # 5) Return the file
+        return FileResponse(
+            path=saved_path,
+            filename=f"cleaned_{file.filename}",
+            media_type="application/octet-stream",
+        )
 
     except HTTPException:
         # Re-raise FastAPI HTTP errors untouched
