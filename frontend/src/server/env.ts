@@ -21,5 +21,9 @@ export const env = {
   /** Feature flag — set to "true" to enable dynamic pricing UI and cron. */
   dynamicPricingEnabled: bool(process.env.DYNAMIC_PRICING_ENABLED, false),
   /** Secret token required by the /api/cron/reprice endpoint. */
-  cronSecretToken: process.env.CRON_SECRET_TOKEN ?? ""
+  cronSecretToken: process.env.CRON_SECRET_TOKEN ?? "",
+  /** Ollama base URL for the dataset assessment agent (no API key needed). */
+  ollamaBaseUrl: process.env.OLLAMA_BASE_URL ?? "http://localhost:11434",
+  /** Ollama model to use — must support tool/function calling. */
+  ollamaModel: process.env.OLLAMA_MODEL ?? "llama3.1:8b"
 };

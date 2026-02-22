@@ -1,0 +1,5 @@
+patient_id,age,blood_type,last_visit
+P1,45,A+,2023-10-10
+P2,32,O-,2023-11-12
+P3,-1,Unknown,None
+P4,150,B+,2020/01/01

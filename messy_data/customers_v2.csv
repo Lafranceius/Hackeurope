@@ -1,0 +1,7 @@
+ID,Name,EMAIL,Date,Spent
+1,john smith,JOHN.SMITH@GMAIL.COM,2023/01/15,150.5
+2,Jane Doe,jane.doe@yahoo.com,2023-02-20,$340.00
+2,Jane Doe,jane.doe@yahoo.com,2023-02-20,340
+3,Bob JOHNSON,,03-05-2023,25
+NULL,Alice Brown,alice.b@company.com,2023-04-12,"1,200.75"
+5,  Charlie   ,charlie@web.de,Unknown,0

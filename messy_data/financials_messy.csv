@@ -1,0 +1,5 @@
+date,desc,amount,currency,status
+2024-01-01,Payment received,100.00,USD,COMPLETED
+02/01/2024,Refund,-50,EUR,pending
+2024.01.03,Subscription,"19,99",GBP,SUCCESS
+Jan 4 2024,Unknown charge,??,USD,FAILED

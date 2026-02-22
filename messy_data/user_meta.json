@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "metadata": {
+      "source": "web",
+      "ip": "192.168.1.1"
+    },
+    "tags": [
+      "active",
+      "new"
+    ]
+  },
+  {
+    "id": 2,
+    "metadata": null,
+    "tags": []
+  },
+  {
+    "id": "3",
+    "metadata": {
+      "source": "mobile"
+    },
+    "tags": "legacy"
+  }
+]

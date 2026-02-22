@@ -1,0 +1,5 @@
+page,visits,bounce_rate,date
+/home,1000,40%,2024-02-01
+/products,500,35.5%,2024-02-01
+/about,200,0.5,2024-02-01
+/contact,invalid,NaN,2024-02-01

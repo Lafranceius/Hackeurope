@@ -1,0 +1,5 @@
+user,post,likes,shares
+user1,Hello world! #coding,100,10
+user2,Check this out: https://example.com,5k,200
+user3,Emoji test 🚀🔥,0,0
+user4,Breaking news!!!,-1,null
