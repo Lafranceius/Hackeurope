@@ -327,6 +327,7 @@ dependencies = [
     { name = "ipykernel" },
     { name = "mcp", extra = ["cli"] },
     { name = "openai-agents" },
+    { name = "python-dotenv" },
     { name = "openpyxl" },
     { name = "pandas" },
 ]
@@ -336,6 +337,7 @@ requires-dist = [
     { name = "ipykernel", specifier = ">=7.2.0" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.26.0" },
     { name = "openai-agents", specifier = ">=0.9.3" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=3.0.1" },
 ]
