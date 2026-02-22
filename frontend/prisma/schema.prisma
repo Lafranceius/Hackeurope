@@ -1,0 +1,508 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrgType {
+  BUYER
+  SELLER
+  BOTH
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum DatasetStatus {
+  DRAFT
+  PUBLISHED
+  DEACTIVATED
+}
+
+enum BidStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  REJECTED
+  AWARDED
+}
+
+enum RequestStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  AWARDED
+  CANCELLED
+}
+
+enum ContractStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum MilestoneStatus {
+  PENDING
+  SUBMITTED
+  CHANGES_REQUESTED
+  ACCEPTED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  VERIFIED
+}
+
+enum FlagStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum DatasetPlanType {
+  ONE_TIME
+  SUBSCRIPTION
+}
+
+enum PurchaseStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum EntitlementAccessType {
+  DOWNLOAD
+  API
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  VOID
+}
+
+enum MessageThreadType {
+  REQUEST
+  CONTRACT
+}
+
+enum AttachmentOwnerType {
+  DATASET
+  REQUEST
+  BID
+  CONTRACT
+}
+
+enum FlagEntityType {
+  DATASET
+  REQUEST
+  USER
+}
+
+model User {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  name            String
+  passwordHash    String?
+  provider        String?
+  isPlatformAdmin Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  memberships     OrgMember[]
+  messages        Message[]
+  auditEvents     AuditEvent[]
+  flagReports     FlagReport[]
+  licenseAccepts  LicenseAcceptance[]
+}
+
+model Org {
+  id                 String        @id @default(cuid())
+  name               String
+  type               OrgType
+  billingEmail       String
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  members            OrgMember[]
+  sellerDatasets     Dataset[]     @relation("SellerDatasets")
+  buyerPurchases     Purchase[]    @relation("BuyerPurchases")
+  buyerEntitlements  Entitlement[] @relation("BuyerEntitlements")
+  buyerRequests      Request[]     @relation("BuyerRequests")
+  supplierBids       Bid[]         @relation("SupplierBids")
+  buyerContracts     Contract[]    @relation("BuyerContracts")
+  supplierContracts  Contract[]    @relation("SupplierContracts")
+  auditEvents        AuditEvent[]
+
+  @@index([type])
+}
+
+model OrgMember {
+  userId    String
+  orgId     String
+  role      OrgRole
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org       Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@id([userId, orgId])
+  @@index([orgId, role])
+}
+
+model Dataset {
+  id                 String           @id @default(cuid())
+  orgId              String
+  title              String
+  description        String
+  tags               String[]
+  categories         String[]
+  status             DatasetStatus    @default(DRAFT)
+  deliveryMethods    String[]
+  lastUpdatedAt      DateTime         @default(now())
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  org                Org              @relation("SellerDatasets", fields: [orgId], references: [id], onDelete: Cascade)
+  schemaFields       DatasetSchemaField[]
+  sampleRows         DatasetSampleRow[]
+  pricePlans         DatasetPricePlan[]
+  license            DatasetLicense?
+  purchases          Purchase[]
+  entitlements       Entitlement[]
+
+  @@index([orgId])
+  @@index([status])
+  @@index([verificationStatus])
+}
+
+model DatasetSchemaField {
+  id        String   @id @default(cuid())
+  datasetId String
+  name      String
+  type      String
+  required  Boolean  @default(false)
+  notes     String?
+  dataset   Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@index([datasetId])
+}
+
+model DatasetSampleRow {
+  id        String  @id @default(cuid())
+  datasetId String
+  jsonRow   Json
+  dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@index([datasetId])
+}
+
+model DatasetPricePlan {
+  id         String          @id @default(cuid())
+  datasetId  String
+  type       DatasetPlanType
+  price      Decimal         @db.Decimal(12, 2)
+  interval   String?
+  tierName   String
+  createdAt  DateTime        @default(now())
+  dataset    Dataset         @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  purchases  Purchase[]
+
+  @@index([datasetId])
+}
+
+model LicenseTemplate {
+  id         String          @id @default(cuid())
+  name       String
+  body       String
+  version    String
+  createdAt  DateTime        @default(now())
+  licenses   DatasetLicense[]
+}
+
+model DatasetLicense {
+  id            String          @id @default(cuid())
+  datasetId     String          @unique
+  templateId    String
+  version       String
+  customClauses String?
+  dataset       Dataset         @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  template      LicenseTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  acceptances   LicenseAcceptance[]
+}
+
+model LicenseAcceptance {
+  id               String         @id @default(cuid())
+  userId           String
+  purchaseId       String
+  datasetLicenseId String
+  acceptedAt       DateTime       @default(now())
+  version          String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purchase         Purchase       @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  datasetLicense   DatasetLicense @relation(fields: [datasetLicenseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, purchaseId])
+  @@index([purchaseId])
+}
+
+model Purchase {
+  id              String         @id @default(cuid())
+  datasetId       String
+  buyerOrgId      String
+  planId          String
+  status          PurchaseStatus @default(PENDING)
+  stripePaymentId String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  dataset         Dataset        @relation(fields: [datasetId], references: [id], onDelete: Restrict)
+  buyerOrg        Org            @relation("BuyerPurchases", fields: [buyerOrgId], references: [id], onDelete: Restrict)
+  plan            DatasetPricePlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+  entitlement     Entitlement?
+  invoice         Invoice?
+  licenseAccepts  LicenseAcceptance[]
+
+  @@index([buyerOrgId])
+  @@index([datasetId])
+  @@index([status])
+}
+
+model Entitlement {
+  id          String                @id @default(cuid())
+  purchaseId  String                @unique
+  buyerOrgId  String
+  datasetId   String
+  accessType  EntitlementAccessType
+  apiKey      String?
+  downloadUrl String?
+  active      Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  purchase    Purchase              @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  buyerOrg    Org                   @relation("BuyerEntitlements", fields: [buyerOrgId], references: [id], onDelete: Cascade)
+  dataset     Dataset               @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@index([buyerOrgId, datasetId])
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  purchaseId  String?       @unique
+  contractId  String?       @unique
+  number      String        @unique
+  status      InvoiceStatus @default(ISSUED)
+  amount      Decimal       @db.Decimal(12, 2)
+  currency    String
+  pdfUrl      String
+  createdAt   DateTime      @default(now())
+  purchase    Purchase?     @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+  contract    Contract?     @relation(fields: [contractId], references: [id], onDelete: SetNull)
+}
+
+model Request {
+  id                     String          @id @default(cuid())
+  buyerOrgId             String
+  title                  String
+  objective              String
+  population             String
+  sampleSize             Int
+  geography              String
+  dataType               String
+  budgetMin              Decimal         @db.Decimal(12, 2)
+  budgetMax              Decimal         @db.Decimal(12, 2)
+  deadlineAt             DateTime
+  flagsMinors            Boolean         @default(false)
+  flagsPii               Boolean         @default(false)
+  consentRequired        Boolean         @default(false)
+  extraComplianceDetails String?
+  status                 RequestStatus   @default(DRAFT)
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  buyerOrg               Org             @relation("BuyerRequests", fields: [buyerOrgId], references: [id], onDelete: Cascade)
+  schemaFields           RequestSchemaField[]
+  bids                   Bid[]
+  contracts              Contract[]
+  threads                MessageThread[]
+
+  @@index([buyerOrgId])
+  @@index([status])
+  @@index([deadlineAt])
+}
+
+model RequestSchemaField {
+  id        String  @id @default(cuid())
+  requestId String
+  name      String
+  type      String
+  required  Boolean @default(false)
+  notes     String?
+  request   Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+}
+
+model Bid {
+  id            String      @id @default(cuid())
+  requestId     String
+  supplierOrgId String
+  status        BidStatus   @default(DRAFT)
+  totalPrice    Decimal     @db.Decimal(12, 2)
+  currency      String
+  timelineStart DateTime
+  timelineEnd   DateTime
+  planText      String
+  complianceJson Json
+  teamJson      Json
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  request       Request     @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  supplierOrg   Org         @relation("SupplierBids", fields: [supplierOrgId], references: [id], onDelete: Cascade)
+  milestones    BidMilestone[]
+  contract      Contract?
+
+  @@index([requestId])
+  @@index([supplierOrgId])
+  @@index([status])
+}
+
+model BidMilestone {
+  id                 String   @id @default(cuid())
+  bidId              String
+  name               String
+  amount             Decimal  @db.Decimal(12, 2)
+  dueDate            DateTime
+  acceptanceCriteria String
+  bid                Bid      @relation(fields: [bidId], references: [id], onDelete: Cascade)
+
+  @@index([bidId])
+}
+
+model Contract {
+  id            String        @id @default(cuid())
+  requestId     String
+  bidId         String        @unique
+  buyerOrgId    String
+  supplierOrgId String
+  status        ContractStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  request       Request       @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  bid           Bid           @relation(fields: [bidId], references: [id], onDelete: Restrict)
+  buyerOrg      Org           @relation("BuyerContracts", fields: [buyerOrgId], references: [id], onDelete: Restrict)
+  supplierOrg   Org           @relation("SupplierContracts", fields: [supplierOrgId], references: [id], onDelete: Restrict)
+  milestones    ContractMilestone[]
+  thread        MessageThread[]
+  invoice       Invoice?
+
+  @@index([requestId])
+  @@index([buyerOrgId])
+  @@index([supplierOrgId])
+  @@index([status])
+}
+
+model ContractMilestone {
+  id                 String          @id @default(cuid())
+  contractId         String
+  name               String
+  amount             Decimal         @db.Decimal(12, 2)
+  dueDate            DateTime
+  status             MilestoneStatus @default(PENDING)
+  acceptanceCriteria String
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  contract           Contract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  deliveries         Delivery[]
+
+  @@index([contractId])
+  @@index([status])
+}
+
+model Delivery {
+  id                  String   @id @default(cuid())
+  contractMilestoneId String
+  fileUrl             String
+  notes               String?
+  submittedAt         DateTime @default(now())
+  milestone           ContractMilestone @relation(fields: [contractMilestoneId], references: [id], onDelete: Cascade)
+
+  @@index([contractMilestoneId])
+}
+
+model MessageThread {
+  id         String            @id @default(cuid())
+  type       MessageThreadType
+  requestId  String?
+  contractId String?
+  createdAt  DateTime          @default(now())
+  request    Request?          @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  contract   Contract?         @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  messages   Message[]
+
+  @@index([type])
+  @@index([requestId])
+  @@index([contractId])
+}
+
+model Message {
+  id           String        @id @default(cuid())
+  threadId     String
+  senderUserId String
+  body         String
+  createdAt    DateTime      @default(now())
+  thread       MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender       User          @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+}
+
+model Attachment {
+  id        String              @id @default(cuid())
+  ownerType AttachmentOwnerType
+  ownerId   String
+  fileUrl   String
+  name      String
+  createdAt DateTime            @default(now())
+
+  @@index([ownerType, ownerId])
+}
+
+model AuditEvent {
+  id           String   @id @default(cuid())
+  actorUserId  String
+  orgId        String?
+  entityType   String
+  entityId     String
+  action       String
+  metadataJson Json
+  createdAt    DateTime @default(now())
+  actor        User     @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+  org          Org?     @relation(fields: [orgId], references: [id], onDelete: SetNull)
+
+  @@index([orgId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model FlagReport {
+  id             String       @id @default(cuid())
+  reporterUserId String
+  entityType     FlagEntityType
+  entityId       String
+  reason         String
+  status         FlagStatus   @default(OPEN)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  reporter       User         @relation(fields: [reporterUserId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([status])
+}
