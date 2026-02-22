@@ -19,10 +19,9 @@ const logIconAction = async (action: string, metadata: Record<string, unknown>) 
 export const TopNavSearch = () => {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [scope, setScope] = useState<"marketplace" | "requests">("marketplace");
 
-  const makeTarget = (nextScope: "marketplace" | "requests", search: string) => {
-    const base = nextScope === "requests" ? "/requests" : "/marketplace";
+  const makeTarget = (search: string) => {
+    const base = "/marketplace";
     const clean = search.trim();
     return clean ? `${base}?q=${encodeURIComponent(clean)}` : base;
   };
@@ -30,15 +29,15 @@ export const TopNavSearch = () => {
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cleanQuery = query.trim();
-    await logIconAction("nav.search.icon", { scope, query: cleanQuery || null });
-    const target = makeTarget(scope, cleanQuery);
+    await logIconAction("nav.search.icon", { scope: "marketplace", query: cleanQuery || null });
+    const target = makeTarget(cleanQuery);
     router.push(target);
   };
 
   return (
     <form
       onSubmit={onSubmit}
-      className="hidden h-10 w-full max-w-[560px] items-center gap-2 rounded-md border border-border bg-mutedSurface px-2.5 shadow-sm md:flex"
+      className="hidden h-10 w-full max-w-[800px] items-center gap-2 rounded-md border border-border bg-mutedSurface px-2.5 shadow-sm md:flex"
       aria-label="Global search"
     >
       <button
@@ -52,21 +51,8 @@ export const TopNavSearch = () => {
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         className="h-7 w-full border-0 bg-transparent px-0 text-sm"
-        placeholder="Search datasets or requests..."
+        placeholder="Search datasets..."
       />
-      <select
-        value={scope}
-        onChange={async (event) => {
-          const nextScope = event.target.value as "marketplace" | "requests";
-          setScope(nextScope);
-          await logIconAction("nav.search.scope.change", { from: scope, to: nextScope, query: query.trim() || null });
-          router.push(makeTarget(nextScope, query));
-        }}
-        className="h-7 border-0 bg-transparent px-1 text-xs text-textSecondary"
-      >
-        <option value="marketplace">Datasets</option>
-        <option value="requests">Requests</option>
-      </select>
     </form>
   );
 };

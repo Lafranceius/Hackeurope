@@ -3,25 +3,24 @@ import Link from "next/link";
 import { TopNav } from "@/components/layout/top-nav";
 import { MarketCard } from "@/components/marketplace/market-card";
 import { Button } from "@/components/ui/button";
+import { Carousel } from "@/components/ui/carousel";
 import { prisma } from "@/lib/prisma";
 
 const LandingPage = async () => {
   const datasets = await prisma.dataset.findMany({
     where: { status: "PUBLISHED" },
     include: { org: true, pricePlans: true },
-    take: 3,
+    take: 9, // Increased take for the carousel
     orderBy: { createdAt: "desc" }
   });
 
   return (
     <div className="app-shell">
       <TopNav />
+      {/* ... keeping other sections the same ... */}
       <section className="subtle-divider bg-gradient-to-b from-[#f8fbff] to-white py-20 md:py-24">
         <div className="container-shell text-center">
-          <span className="inline-flex rounded-full border border-border bg-white px-3 py-1 text-xs font-medium text-brand shadow-sm">
-            Enterprise-grade data trading + contracting
-          </span>
-          <h1 className="hero-title mx-auto mt-6 max-w-4xl text-textPrimary">
+          <h1 className="hero-title mx-auto max-w-4xl text-textPrimary">
             Exchange high-fidelity data like financial markets
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-7 text-textSecondary">
@@ -41,11 +40,11 @@ const LandingPage = async () => {
         </div>
       </section>
 
-      <section className="subtle-divider">
-        <div className="container-shell flex flex-wrap items-center justify-center gap-x-10 gap-y-5 py-7 text-sm text-textMuted">
-          <span className="kicker !tracking-[0.06em]">Trusted by data teams at</span>
+      <section className="subtle-divider bg-black">
+        <div className="container-shell flex flex-wrap items-center justify-center gap-x-10 gap-y-5 py-7 text-sm text-white">
+          <span className="kicker !tracking-[0.06em] !text-white/80">Trusted by data teams at</span>
           {["ACME Corp", "Globex", "Soylent", "Initech", "Umbrella"].map((name) => (
-            <span key={name} className="font-medium text-textSecondary">
+            <span key={name} className="font-medium text-white">
               {name}
             </span>
           ))}
@@ -94,19 +93,20 @@ const LandingPage = async () => {
               View all
             </Link>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
+          <Carousel>
             {datasets.map((dataset) => (
-              <MarketCard
-                key={dataset.id}
-                id={dataset.id}
-                title={dataset.title}
-                provider={dataset.org.name}
-                category={dataset.categories[0] ?? "General"}
-                price={Number(dataset.pricePlans[0]?.price ?? 0)}
-                metric="+12%"
-              />
+              <div key={dataset.id} className="min-w-[300px] md:min-w-[350px] snap-start shrink-0">
+                <MarketCard
+                  id={dataset.id}
+                  title={dataset.title}
+                  provider={dataset.org.name}
+                  category={dataset.categories[0] ?? "General"}
+                  price={Number(dataset.pricePlans[0]?.price ?? 0)}
+                  metric="+12%"
+                />
+              </div>
             ))}
-          </div>
+          </Carousel>
         </div>
       </section>
 

@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 
+const truncateBoxTitle = (value: string) => (value.length > 25 ? `${value.slice(0, 25)}.....` : value);
+
 const Sparkline = ({ points }: { points: number[] }) => (
   <div className="mt-3 flex h-11 items-end gap-1">
     {points.map((point, index) => (
@@ -27,16 +29,17 @@ export const MarketCard = ({
   price: number;
   metric: string;
 }) => (
-  <Card className="panel-hover p-4">
+  <Card className="panel-hover rounded-3xl p-4">
     <div className="flex items-center justify-between">
       <Badge variant="info">{category}</Badge>
       <span className="text-xs text-textMuted">7d {metric}</span>
     </div>
     <Link
       href={`/datasets/${id}`}
+      title={title}
       className="mt-3 block text-[28px] leading-8 font-semibold tracking-[-0.01em] hover:text-brand"
     >
-      {title}
+      {truncateBoxTitle(title)}
     </Link>
     <p className="mt-2 text-sm text-textMuted">{provider}</p>
     <Sparkline points={[30, 45, 40, 60, 55, 72, 78]} />

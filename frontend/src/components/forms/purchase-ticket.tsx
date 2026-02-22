@@ -18,6 +18,7 @@ export const PurchaseTicket = ({
   stripeEnabled: boolean;
 }) => {
   const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id ?? "");
+  const [rowCount, setRowCount] = useState<string>("all");
   const [state, setState] = useState<{ loading: boolean; error?: string; success?: string }>({ loading: false });
 
   const selected = plans.find((plan) => plan.id === selectedPlanId);
@@ -35,7 +36,8 @@ export const PurchaseTicket = ({
           datasetId,
           planId: selected.id,
           amount: selected.price,
-          currency: "USD"
+          currency: "USD",
+          rowCount
         })
       });
       const response = await checkout.json();
@@ -53,7 +55,7 @@ export const PurchaseTicket = ({
     const testPurchase = await fetch("/api/purchases/test", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ buyerOrgId: orgId, datasetId, planId: selected.id })
+      body: JSON.stringify({ buyerOrgId: orgId, datasetId, planId: selected.id, rowCount })
     });
 
     const body = await testPurchase.json();
@@ -76,6 +78,16 @@ export const PurchaseTicket = ({
               {plan.tierName} - ${plan.price}/{plan.interval ?? "one-time"}
             </option>
           ))}
+        </select>
+      </div>
+      <div>
+        <label className="field-label">Number of Rows</label>
+        <select className="w-full" value={rowCount} onChange={(event) => setRowCount(event.target.value)}>
+          <option value="all">Full Dataset</option>
+          <option value="1000">1,000 rows (Sample)</option>
+          <option value="10000">10,000 rows</option>
+          <option value="100000">100,000 rows</option>
+          <option value="1000000">1,000,000 rows</option>
         </select>
       </div>
       <div className="rounded-md border border-border bg-mutedSurface p-3 text-sm">

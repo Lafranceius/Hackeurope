@@ -31,8 +31,7 @@ const NewDatasetPage = async () => {
               key={step}
               className={`rounded-lg border p-4 ${index === 0 ? "border-brand bg-brandSoft" : "border-border bg-surface"}`}
             >
-              <p className="kicker">Step {index + 1}</p>
-              <p className="mt-1 font-semibold">{step}</p>
+              <p className="font-semibold">{step}</p>
             </div>
           ))}
         </div>

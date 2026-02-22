@@ -343,7 +343,7 @@ const runDeterministicAssessment = (sample: ParsedSample, fileName: string): Age
     return {
       qualityPercent: 30,
       complexityTag: "D",
-      cleaningCostUsd: 50,
+      cleaningCostUsd: 25,
       issues: ["File contains no data rows — nothing to assess"],
       summary: `${sample.fileType} file has no data rows.`
     };
@@ -421,15 +421,18 @@ const runDeterministicAssessment = (sample: ParsedSample, fileName: string): Age
   // Cleaning cost scales with number and severity of recommendations
   const cleaningCostUsd = Math.round(
     Math.min(
-      250,
-      Math.max(
-        50,
-        50
-        + recommendations.length * 15
-        + columnReports.filter((c) => Number(c.nullPercent ?? 0) > 5).length * 20
-        + (dup.hasDuplicates ? 25 : 0)
-        + typeResults.filter((t) => t.result.isMixed).length * 20
-      )
+      50,
+      Math.min(
+        250,
+        Math.max(
+          50,
+          50
+          + recommendations.length * 15
+          + columnReports.filter((c) => Number(c.nullPercent ?? 0) > 5).length * 20
+          + (dup.hasDuplicates ? 25 : 0)
+          + typeResults.filter((t) => t.result.isMixed).length * 20
+        )
+      ) / 2
     )
   );
 
