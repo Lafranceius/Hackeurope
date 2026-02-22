@@ -1,5 +1,3 @@
-import asyncio
-
 import pandas as pd
 from agents_pipeline import run_agentic_pipeline
 from dotenv import load_dotenv

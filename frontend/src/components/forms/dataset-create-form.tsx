@@ -167,6 +167,11 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
 
   const cleanUploadedData = async () => {
     setShowCleanConfirm(false);
+    if (!selectedFile) {
+      setCleanError("No file selected to clean.");
+      return;
+    }
+
     setCleaning(true);
     setCleanError(null);
     setCleaned(false);
@@ -174,21 +179,56 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
 
     // Simulate backend cleaning process
     await new Promise((resolve) => setTimeout(resolve, simulatedLoadingMs));
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
 
-    // Simulate success
-    setCleaning(false);
-    setCleaned(true);
+      const apiUrl = process.env.NEXT_PUBLIC_PYTHON_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/upload/`, {
+        method: "POST",
+        body: formData,
+      });
 
-    // Create a dummy download link for the "cleaned" file
-    const blob = new Blob(["Simulated cleaned data"], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `cleaned_${uploadedFile?.fileName || "dataset.csv"}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+      if (!response.ok) {
+        let errorMessage = "Failed to clean data on the server.";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData?.detail || errorMessage;
+        } catch {
+          // Ignore
+        }
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+
+      setCleaning(false);
+      setCleaned(true);
+
+      // Create a download link for the returned file
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = `cleaned_${selectedFile.name}`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) {
+          filename = match[1];
+        }
+      }
+
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+    } catch (error: any) {
+      setCleaning(false);
+      setCleanError(error.message || "An error occurred during cleaning.");
+    }
   };
 
   const validateAndUseFile = async (file: File) => {
