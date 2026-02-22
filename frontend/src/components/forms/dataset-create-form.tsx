@@ -75,6 +75,11 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
   const [assessmentError, setAssessmentError] = useState<string | null>(null);
   const [assessment, setAssessment] = useState<DatasetAssessmentResult | null>(null);
 
+  // Cleaning
+  const [cleaning, setCleaning] = useState(false);
+  const [cleaned, setCleaned] = useState(false);
+  const [cleanError, setCleanError] = useState<string | null>(null);
+
   // Price — starts at DEFAULT_PRICE, auto-updated once agent produces a recommendation
   const [planPrice, setPlanPrice] = useState(DEFAULT_PRICE);
 
@@ -157,6 +162,30 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
     const uploaded = result.data as UploadedDatasetFile;
     setUploadedFile(uploaded);
     await runAssessment(uploaded);
+  };
+
+  const cleanUploadedData = async () => {
+    setCleaning(true);
+    setCleanError(null);
+    setCleaned(false);
+
+    // Simulate backend cleaning process
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // Simulate success
+    setCleaning(false);
+    setCleaned(true);
+
+    // Create a dummy download link for the "cleaned" file
+    const blob = new Blob(["Simulated cleaned data"], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cleaned_${uploadedFile?.fileName || "dataset.csv"}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const validateAndUseFile = async (file: File) => {
@@ -388,27 +417,69 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
               ) : null}
 
               {/* Quality bar */}
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="font-medium text-textSecondary">Data quality</span>
-                  <span className="font-semibold text-textPrimary">
-                    {assessment.PLACEHOLDER_QUALITY_PERCENT}%
-                  </span>
-                </div>
-                <div
-                  className="h-2 w-full rounded-full bg-mutedSurface"
-                  role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={assessment.PLACEHOLDER_QUALITY_PERCENT}
-                  aria-label="Data quality percentage"
-                >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="mb-2 flex items-center justify-between text-sm">
+                    <span className="font-medium text-textSecondary">Data quality</span>
+                    <span className="font-semibold text-textPrimary">
+                      {assessment.PLACEHOLDER_QUALITY_PERCENT}%
+                    </span>
+                  </div>
                   <div
-                    className={`h-2 rounded-full ${qualityToneClass(assessment.PLACEHOLDER_QUALITY_PERCENT)}`}
-                    style={{ width: `${assessment.PLACEHOLDER_QUALITY_PERCENT}%` }}
-                  />
+                    className="h-2 w-full rounded-full bg-mutedSurface"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={assessment.PLACEHOLDER_QUALITY_PERCENT}
+                    aria-label="Data quality percentage"
+                  >
+                    <div
+                      className={`h-2 rounded-full ${qualityToneClass(assessment.PLACEHOLDER_QUALITY_PERCENT)}`}
+                      style={{ width: `${assessment.PLACEHOLDER_QUALITY_PERCENT}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-col items-end justify-center self-end">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={cleanUploadedData}
+                    disabled={cleaning || cleaned}
+                  >
+                    {cleaning ? "Cleaning..." : cleaned ? "Cleaned" : "Clean Data"}
+                  </Button>
+                  {cleanError && <p className="mt-1 text-xs text-danger">{cleanError}</p>}
                 </div>
               </div>
+
+              {/* Improved Quality Bar (shown after cleaning) */}
+              {cleaned && (
+                <div className="mt-4 rounded-md border border-success/20 bg-success-soft p-3">
+                  <div className="mb-2 flex items-center justify-between text-sm">
+                    <span className="font-medium text-success">Cleaned data quality</span>
+                    <span className="font-semibold text-success">
+                      {assessment.PLACEHOLDER_IMPROVED_QUALITY_PERCENT}%
+                    </span>
+                  </div>
+                  <div
+                    className="h-2 w-full rounded-full bg-success/20"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={assessment.PLACEHOLDER_IMPROVED_QUALITY_PERCENT}
+                    aria-label="Improved data quality percentage"
+                  >
+                    <div
+                      className="h-2 rounded-full bg-success"
+                      style={{ width: `${assessment.PLACEHOLDER_IMPROVED_QUALITY_PERCENT}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-success/80">
+                    File download started automatically. You can safely discard or upload the cleaned file directly.
+                  </p>
+                </div>
+              )}
 
               {/* Complexity */}
               <div className="flex flex-wrap items-center gap-2 text-sm">

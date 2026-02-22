@@ -190,7 +190,11 @@ const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: stri
             <Card className="p-4">
               <h3 className="font-semibold">Seller actions</h3>
               <div className="mt-3">
-                <DatasetPublishActions datasetId={dataset.id} orgId={dataset.orgId} status={dataset.status} />
+                <DatasetPublishActions
+                  datasetId={dataset.id}
+                  orgId={dataset.orgId}
+                  status={dataset.status}
+                />
               </div>
             </Card>
           ) : null}
@@ -206,12 +210,12 @@ const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: stri
               snapshot={
                 pricingSnapshot
                   ? {
-                      id: pricingSnapshot.id,
-                      recommendedPrice: pricingSnapshot.recommendedPrice.toNumber(),
-                      appliedPrice: pricingSnapshot.appliedPrice?.toNumber() ?? null,
-                      explanationJson: pricingSnapshot.explanationJson,
-                      computedAt: pricingSnapshot.computedAt.toISOString()
-                    }
+                    id: pricingSnapshot.id,
+                    recommendedPrice: pricingSnapshot.recommendedPrice.toNumber(),
+                    appliedPrice: pricingSnapshot.appliedPrice?.toNumber() ?? null,
+                    explanationJson: pricingSnapshot.explanationJson,
+                    computedAt: pricingSnapshot.computedAt.toISOString()
+                  }
                   : null
               }
               config={pricingConfig}
