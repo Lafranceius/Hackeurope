@@ -1,3 +1,4 @@
+import { AttachmentOwnerType, OrgRole } from "@prisma/client";
 import Link from "next/link";
 import { cookies } from "next/headers";
 
@@ -12,6 +13,7 @@ import { DatasetPricingPanel } from "@/components/pricing/dataset-pricing-panel"
 import { prisma } from "@/lib/prisma";
 import { env } from "@/server/env";
 import { requirePageSession } from "@/server/page-auth";
+import { hasAtLeastRole } from "@/server/rbac";
 import { getOrComputeRecommendation } from "@/server/services/dynamic-pricing";
 
 const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: string }> }) => {
@@ -51,7 +53,19 @@ const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: stri
 
   const activeOrgCookie = (await cookies()).get("activeOrgId")?.value;
   const activeOrgId = activeOrgCookie ?? user.activeOrgId ?? user.memberships[0]?.orgId;
-  const isSeller = user.memberships.some((membership) => membership.orgId === dataset.orgId);
+  const sellerMembership = user.memberships.find((membership) => membership.orgId === dataset.orgId);
+  const isSeller = Boolean(sellerMembership);
+  const canManageSellerActions = sellerMembership ? hasAtLeastRole(sellerMembership.role, OrgRole.ADMIN) : false;
+  const datasetFileAttachment = isSeller
+    ? await prisma.attachment.findFirst({
+        where: {
+          ownerType: AttachmentOwnerType.DATASET,
+          ownerId: dataset.id
+        },
+        select: { id: true }
+      })
+    : null;
+  const hasDatasetFile = Boolean(datasetFileAttachment);
   const entitlement = dataset.purchases[0]?.entitlement;
   const invoice = dataset.purchases[0]?.invoice;
 
@@ -123,8 +137,6 @@ const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: stri
           <Card className="p-5 md:p-6">
             <div className="mb-4 flex gap-4 border-b border-border pb-3 text-sm">
               <span className="border-b-2 border-brand pb-2 font-semibold text-brand">Overview</span>
-              <span className="pb-2 text-textMuted">Schema</span>
-              <span className="pb-2 text-textMuted">Sample Data</span>
             </div>
             <p className="text-textSecondary">{dataset.description}</p>
 
@@ -194,6 +206,9 @@ const DatasetDetailPage = async ({ params }: { params: Promise<{ datasetId: stri
                   datasetId={dataset.id}
                   orgId={dataset.orgId}
                   status={dataset.status}
+                  canManage={canManageSellerActions}
+                  hasDatasetFile={hasDatasetFile}
+                  estimatedImproveCostUsd={50}
                 />
               </div>
             </Card>

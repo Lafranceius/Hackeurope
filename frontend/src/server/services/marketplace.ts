@@ -183,6 +183,7 @@ export const completePurchase = async (args: {
   datasetId: string;
   planId: string;
   stripePaymentId?: string;
+  overrideInvoiceAmount?: number;
 }) => {
   const dataset = await prisma.dataset.findUnique({
     where: { id: args.datasetId },
@@ -203,6 +204,10 @@ export const completePurchase = async (args: {
   if (!selectedPlan) {
     throw new Error("Invalid plan");
   }
+  const invoiceAmount =
+    typeof args.overrideInvoiceAmount === "number" && Number.isFinite(args.overrideInvoiceAmount) && args.overrideInvoiceAmount > 0
+      ? new Prisma.Decimal(args.overrideInvoiceAmount)
+      : selectedPlan.price;
 
   const purchase = await prisma.$transaction(async (tx) => {
     const created = await tx.purchase.create({
@@ -245,7 +250,7 @@ export const completePurchase = async (args: {
         purchaseId: created.id,
         number: invoiceNumber(),
         status: "ISSUED",
-        amount: selectedPlan.price,
+        amount: invoiceAmount,
         currency: "USD",
         pdfUrl: `/invoices/${created.id}.pdf`
       }

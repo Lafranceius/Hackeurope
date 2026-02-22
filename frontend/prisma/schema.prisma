@@ -110,6 +110,13 @@ enum FlagEntityType {
   USER
 }
 
+enum AgentJobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
 model User {
   id                String              @id @default(cuid())
   email             String              @unique
@@ -183,6 +190,7 @@ model Dataset {
   datasetPricingConfig    DatasetPricingConfig?
   datasetPricingSnapshots DatasetPricingSnapshot[]
   priceChangeAudits       PriceChangeAudit[]
+  agentJobs               DatasetAgentJob[]
 
   @@index([orgId])
   @@index([status])
@@ -550,5 +558,21 @@ model FlagReport {
   reporter       User           @relation(fields: [reporterUserId], references: [id], onDelete: Cascade)
 
   @@index([entityType, entityId])
+  @@index([status])
+}
+
+model DatasetAgentJob {
+  id           String         @id @default(cuid())
+  datasetId    String
+  attachmentId String
+  status       AgentJobStatus @default(QUEUED)
+  inputJson    Json
+  resultJson   Json?
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  dataset      Dataset        @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@index([datasetId])
   @@index([status])
 }

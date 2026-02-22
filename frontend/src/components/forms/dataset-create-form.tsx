@@ -79,6 +79,7 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
   const [cleaning, setCleaning] = useState(false);
   const [cleaned, setCleaned] = useState(false);
   const [cleanError, setCleanError] = useState<string | null>(null);
+  const [showCleanConfirm, setShowCleanConfirm] = useState(false);
 
   // Price — starts at DEFAULT_PRICE, auto-updated once agent produces a recommendation
   const [planPrice, setPlanPrice] = useState(DEFAULT_PRICE);
@@ -165,6 +166,7 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
   };
 
   const cleanUploadedData = async () => {
+    setShowCleanConfirm(false);
     if (!selectedFile) {
       setCleanError("No file selected to clean.");
       return;
@@ -173,7 +175,10 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
     setCleaning(true);
     setCleanError(null);
     setCleaned(false);
+    const simulatedLoadingMs = 12_000 + Math.floor(Math.random() * 3_001);
 
+    // Simulate backend cleaning process
+    await new Promise((resolve) => setTimeout(resolve, simulatedLoadingMs));
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
@@ -480,13 +485,53 @@ export const DatasetCreateForm = ({ orgId, templates }: { orgId: string; templat
 
                 <div className="flex shrink-0 flex-col items-end justify-center self-end">
                   <Button
-                    variant="secondary"
+                    className="bg-green-500 border-none text-white hover:bg-green-600"
                     size="sm"
-                    onClick={cleanUploadedData}
+                    onClick={() => {
+                      setCleanError(null);
+                      setShowCleanConfirm(true);
+                    }}
                     disabled={cleaning || cleaned}
                   >
-                    {cleaning ? "Cleaning..." : cleaned ? "Cleaned" : "Clean Data"}
+                    {cleaning ? (
+                      <>
+                        <span
+                          className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-blue-200 border-t-blue-700"
+                          aria-hidden="true"
+                        />
+                        Cleaning...
+                      </>
+                    ) : cleaned ? (
+                      "Cleaned"
+                    ) : (
+                      "Clean Data"
+                    )}
                   </Button>
+                  {showCleanConfirm && assessment ? (
+                    <div className="mt-2 w-full rounded-md border border-brand/20 bg-brandSoft p-2 text-left text-xs">
+                      <p className="text-textPrimary">
+                        Cleaning will cost{" "}
+                        <span className="font-semibold">
+                          ${assessment.PLACEHOLDER_CLEANING_COST_USD.toLocaleString()}
+                        </span>
+                        . Are you sure?
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <Button size="sm" type="button" onClick={cleanUploadedData} disabled={cleaning}>
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          onClick={() => setShowCleanConfirm(false)}
+                          disabled={cleaning}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null}
                   {cleanError && <p className="mt-1 text-xs text-danger">{cleanError}</p>}
                 </div>
               </div>

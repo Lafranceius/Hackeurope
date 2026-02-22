@@ -102,28 +102,80 @@ async function main() {
   const categoryConfigs = [
     {
       category: "Finance",
-      prefix: "Global Equity Signal Dataset",
+      titleSeeds: [
+        "Equity OHLCV Time Series",
+        "FX Spot Rate Time Series",
+        "Index Futures Order Book Snapshots",
+        "Options Implied Volatility Surface",
+        "Corporate Bond Spread Monitor"
+      ],
+      intervals: ["5m", "15m", "1h", "1d", "30s"],
+      regionLabels: ["US Large Cap", "Nordics", "DACH", "APAC Composite", "UK Midcap"],
+      descriptionNotes: [
+        "normalized market timestamps and venue harmonization",
+        "gap flags, split-adjustments, and holiday calendar alignment",
+        "exchange session metadata and liquidity markers"
+      ],
       tags: ["finance", "equities", "tick"],
       basePrice: 6000,
       primaryPlanType: "SUBSCRIPTION" as const
     },
     {
       category: "Healthcare",
-      prefix: "Clinical Outcomes Intelligence Dataset",
+      titleSeeds: [
+        "Hospital Bed Utilization Time Series",
+        "Clinical Lab Turnaround Metrics",
+        "ER Queue and Triage Throughput Feed",
+        "Claims Adjudication Latency Panel",
+        "Pharmacy Dispense Volume Index"
+      ],
+      intervals: ["1h", "6h", "1d", "12h", "30m"],
+      regionLabels: ["US Northeast", "US West", "Benelux", "Nordic Hospitals", "UK NHS Trust Sample"],
+      descriptionNotes: [
+        "de-identified aggregates with compliance-safe segmentation",
+        "facility-level trend normalization and anomaly flags",
+        "weekly and seasonal adjustment fields for operational analytics"
+      ],
       tags: ["healthcare", "claims", "outcomes"],
       basePrice: 18000,
       primaryPlanType: "ONE_TIME" as const
     },
     {
       category: "Retail",
-      prefix: "Consumer Footfall and Spend Dataset",
+      titleSeeds: [
+        "Store Footfall Sensor Time Series",
+        "Point-of-Sale Basket Velocity Feed",
+        "Shopping Mall Dwell-Time Aggregates",
+        "Regional Retail Inventory Pulse",
+        "Promo Conversion and Coupon Redemption Stream"
+      ],
+      intervals: ["15m", "1h", "1d", "30m", "5m"],
+      regionLabels: ["Nordic Urban Centers", "US Suburban Malls", "DACH Grocery Chain", "UK High Street", "Iberia Retail Parks"],
+      descriptionNotes: [
+        "store-level traffic and spend normalization with calendar tagging",
+        "promotion windows, closure flags, and holiday uplift markers",
+        "aggregated device-count and transaction proxies for demand modeling"
+      ],
       tags: ["retail", "transactions", "consumer"],
       basePrice: 9000,
       primaryPlanType: "SUBSCRIPTION" as const
     },
     {
       category: "Energy",
-      prefix: "Grid Load and Generation Dataset",
+      titleSeeds: [
+        "Grid Load and Generation Time Series",
+        "Solar Panel Output Telemetry",
+        "Wind Turbine SCADA Performance Feed",
+        "Substation Voltage and Frequency Monitor",
+        "Offshore Maritime Sonar and Vessel Proximity Stream"
+      ],
+      intervals: ["5m", "1h", "10m", "30s", "10s"],
+      regionLabels: ["Nordic Grid Zones", "Southern Europe Solar Farms", "North Sea Offshore Assets", "US ISO Hubs", "Baltic Marine Corridors"],
+      descriptionNotes: [
+        "plant and feeder telemetry with quality-controlled resampling",
+        "weather-aligned generation metrics and outage annotations",
+        "sensor drift checks, calibration markers, and downtime labels"
+      ],
       tags: ["energy", "grid", "forecast"],
       basePrice: 12000,
       primaryPlanType: "SUBSCRIPTION" as const
@@ -138,7 +190,11 @@ async function main() {
 
     for (let item = 1; item <= 20; item += 1) {
       const supplier = supplierOrgs[(datasetIndex + item) % supplierOrgs.length];
-      const title = `${config.prefix} ${String(item).padStart(2, "0")}`;
+      const seedTitle = config.titleSeeds[(item - 1) % config.titleSeeds.length];
+      const interval = config.intervals[(item - 1) % config.intervals.length];
+      const region = config.regionLabels[(datasetIndex + item) % config.regionLabels.length];
+      const note = config.descriptionNotes[(item + categoryIndex) % config.descriptionNotes.length];
+      const title = `${seedTitle} (${interval} interval) - ${region} ${String(item).padStart(2, "0")}`;
       const price = config.basePrice + item * 350 + categoryIndex * 600;
       const isSensitiveCategory = config.category === "Healthcare";
 
@@ -146,7 +202,7 @@ async function main() {
         data: {
           orgId: supplier.id,
           title,
-          description: `${title} includes normalized records with enterprise-grade QC and delivery automation.`,
+          description: `${title} includes normalized records with ${note}. Delivery supports bulk export and API access with enterprise-grade QC automation.`,
           tags: [...config.tags, `batch-${item}`],
           categories: [config.category],
           status: "PUBLISHED",

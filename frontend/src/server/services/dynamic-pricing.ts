@@ -67,7 +67,7 @@ const gatherPricingInputs = async (datasetId: string): Promise<PricingInput> => 
   // once assessment results are stored on the dataset record)
   const qualityPercent = 62;
   const complexityTag = "B" as const;
-  const cleaningCostUsd = 110;
+  const cleaningCostUsd = 50;
 
   const currentPlan = dataset.pricePlans[0];
   const currentPriceUsd = currentPlan ? Number(currentPlan.price) : null;

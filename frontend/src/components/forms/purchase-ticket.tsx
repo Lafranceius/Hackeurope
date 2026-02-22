@@ -6,6 +6,24 @@ import { Button } from "@/components/ui/button";
 
 type Plan = { id: string; tierName: string; type: string; price: number; interval?: string | null };
 
+const rowCountMultiplier = (rowCount: string) => {
+  switch (rowCount) {
+    case "1000":
+      return 0.2;
+    case "10000":
+      return 0.35;
+    case "100000":
+      return 0.6;
+    case "1000000":
+      return 0.85;
+    case "all":
+    default:
+      return 1;
+  }
+};
+
+const roundCurrency = (value: number) => Math.round(value * 100) / 100;
+
 export const PurchaseTicket = ({
   orgId,
   datasetId,
@@ -18,9 +36,11 @@ export const PurchaseTicket = ({
   stripeEnabled: boolean;
 }) => {
   const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id ?? "");
+  const [rowCount, setRowCount] = useState<string>("all");
   const [state, setState] = useState<{ loading: boolean; error?: string; success?: string }>({ loading: false });
 
   const selected = plans.find((plan) => plan.id === selectedPlanId);
+  const effectivePrice = selected ? roundCurrency(selected.price * rowCountMultiplier(rowCount)) : 0;
 
   const buy = async () => {
     if (!selected) return;
@@ -34,8 +54,9 @@ export const PurchaseTicket = ({
           buyerOrgId: orgId,
           datasetId,
           planId: selected.id,
-          amount: selected.price,
-          currency: "USD"
+          amount: effectivePrice,
+          currency: "USD",
+          rowCount
         })
       });
       const response = await checkout.json();
@@ -53,7 +74,7 @@ export const PurchaseTicket = ({
     const testPurchase = await fetch("/api/purchases/test", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ buyerOrgId: orgId, datasetId, planId: selected.id })
+      body: JSON.stringify({ buyerOrgId: orgId, datasetId, planId: selected.id, rowCount, amount: effectivePrice })
     });
 
     const body = await testPurchase.json();
@@ -78,9 +99,22 @@ export const PurchaseTicket = ({
           ))}
         </select>
       </div>
+      <div>
+        <label className="field-label">Number of Rows</label>
+        <select className="w-full" value={rowCount} onChange={(event) => setRowCount(event.target.value)}>
+          <option value="all">Full Dataset</option>
+          <option value="1000">1,000 rows (Sample)</option>
+          <option value="10000">10,000 rows</option>
+          <option value="100000">100,000 rows</option>
+          <option value="1000000">1,000,000 rows</option>
+        </select>
+      </div>
       <div className="rounded-md border border-border bg-mutedSurface p-3 text-sm">
         <p className="text-textMuted">Total price</p>
-        <p className="mt-1 text-3xl font-semibold">${selected?.price?.toLocaleString() ?? "0"}</p>
+        <p className="mt-1 text-3xl font-semibold">${effectivePrice.toLocaleString()}</p>
+        {selected && rowCount !== "all" ? (
+          <p className="mt-1 text-xs text-textMuted">Full dataset price: ${selected.price.toLocaleString()}</p>
+        ) : null}
       </div>
       <Button fullWidth size="lg" onClick={buy} disabled={state.loading || !selectedPlanId}>
         {state.loading ? "Processing..." : "Purchase Access"}
